@@ -1,3 +1,3 @@
 # Cabbage-Potato-Union
 Copy, Paste, Unwrap! 
-Please wait for some little time...
+Week 7 updated: 电路设计图 in docs
