@@ -1,4 +1,5 @@
 // implements 128KB of on-board RAM
+`include "common/block_ram/block_ram.v"
 
 module ram #(
     parameter ADDR_WIDTH = 17
@@ -26,6 +27,6 @@ module ram #(
   );
 
   assign ram_bram_we = (en_in) ? ~r_nw_in : 1'b0;
-  assign d_out       = (en_in) ? ram_bram_dout : 8'h00;
+  assign d_out       = ram_bram_dout;
 
 endmodule

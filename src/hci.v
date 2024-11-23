@@ -26,6 +26,7 @@
 ***************************************************************************************************/
 
 // modification allowed for debugging purposes
+`include "common/uart/uart.v"
 
 module hci
 #(
