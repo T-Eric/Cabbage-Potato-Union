@@ -2,34 +2,32 @@
 // Connect: RS(io),ins_cache(io),
 // Function: get current instruction for cpu, with decoding, into RS
 // TODO: FIFO, decoder to control later elements,
+`include "utils/head.v"
 
-module ins_fetch #(
-    parameter ADDR_WIDTH = 17,
-    parameter INS_WIDTH  = 32
-) (
+module ins_fetch (
     input clk,
     input rst,
 
-    // connect cpu
+    // to RS and ROB: decoded numbers
     input en,
     input addr_en,  // whether we need to fetch now
-    input [ADDR_WIDTH-1:0] addr_get,  // address to fetch, connect pc
-    output reg [INS_WIDTH:0] ins_out,
+    input [`RAM_ADR_W-1:0] addr_get,  // address to fetch, connect pc
+    output reg [`DAT_W:0] ins_out,
     output reg ins_ok,
     output reg busy,
 
-    // connect ic
+    // from ic: get ins
     output reg ins_call,  // call cache what i need
-    output reg [ADDR_WIDTH-1:0] addr_out,
-    input ins_get,  // whether ins_cache returned the ins
-    input [INS_WIDTH-1:0] ins_in  // from ins_cache
+    output reg [`RAM_ADR_W-1:0] addr_out,
+    input cache_en,  // whether ins_cache returned the ins
+    input [`DAT_W-1:0] cache_ins_in  // from ins_cache
 );
 
   /*
 states:
 idle--default 
 call-- if addr_en when idle, receive addr_get and put to ins_call, wait
-reply--if ins_get,put ins_in to 
+reply--if cache_en,put cache_ins_in to 
 
 */
 
@@ -55,9 +53,9 @@ reply--if ins_get,put ins_in to
         end
         1: begin  // call
           ins_call <= 0;  // 不到要不要手动关闭请求
-          if (ins_get) begin
+          if (cache_en) begin
             ins_call <= 0;
-            ins_out <= ins_in;// 这就是issue了
+            ins_out <= cache_ins_in;// 这就是issue了
             ins_ok <= 1;
             t_state <= 0;
             busy <= 0;

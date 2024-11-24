@@ -14,7 +14,7 @@ module memory_io #(
     input en,
     input data_en,  // call io to function
     input rw_en,  // read 1 write 0
-    input [1:0] mode,  //0:1byte 1:2byte 2:4byte 
+    input [2:0] len_in,  //0:1byte 1:2byte 2:4byte 
 
     input [31:0] addr_in,
     output reg ready,  // can be used

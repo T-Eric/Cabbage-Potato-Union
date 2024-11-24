@@ -28,6 +28,13 @@ module cpu(
 // - 0x30004 read: read clocks passed since cpu starts (in dword, 4 bytes)
 // - 0x30004 write: indicates program stop (will output '\0' through uart tx)
 
+// connect the items
+
+// TODO 还没有考虑好ins_fetch和issue之间的关系和职能分配
+assign en=rdy_in;// en for all
+
+
+
 always @(posedge clk_in)
   begin
     if (rst_in)

@@ -1,6 +1,7 @@
 // Instruction Cache, 2-way set-associative cache
 // Connect: mem_io,ins_fetch,pc
 // Function: directly give the right instruction according to the cpu_in
+// TODO: 尝试不再依赖mem_io而是自己直接与ram交互
 
 module ins_cache (
     input clk,
@@ -100,6 +101,6 @@ module ins_cache (
       cpu_ok <= repeat (1) @(negedge clk) 0;
       // return to 0, maybe we can do this in 
     end
-    
+
   end
 endmodule

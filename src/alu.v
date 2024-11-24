@@ -11,15 +11,20 @@ module alu #(
     input en,
 
     // from Reservation Station
-    input [2:0] ins_type,  // or[31:0] ins, decode here?
+    input  rs_en_i, 
+    input [2:0] tp,  // or[31:0] ins, decode here?
+    input [5:0] op,
     input [DATA_WIDTH-1:0] lhs,  //rs1
-    input [DATA_WIDTH-1:0] rhs,  //rs2/imm 
+    input [DATA_WIDTH-1:0] rhs,  //rs2/imm
+
+    // to RS
+    output reg rs_en_o,
 
     // to cdb
     // cdb_rob_id
-    output reg cdb_alu_en,// one activate en from alu 
-    output reg [REG_BIT-1:0] cdb_rd_out,
-    output reg [DATA_WIDTH-1:0] cdb_data_out
+    output reg cdb_alu_en,  // one activate en from alu 
+    output reg [REG_BIT-1:0] cdb_rd_o,
+    output reg [DATA_WIDTH-1:0] cdb_data_o
 );
 
 
