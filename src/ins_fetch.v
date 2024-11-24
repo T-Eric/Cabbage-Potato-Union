@@ -20,7 +20,13 @@ module ins_fetch (
     output reg ins_call,  // call cache what i need
     output reg [`RAM_ADR_W-1:0] addr_out,
     input cache_en,  // whether ins_cache returned the ins
-    input [`DAT_W-1:0] cache_ins_in  // from ins_cache
+    input [`DAT_W-1:0] cache_ins_in,  // from ins_cache
+
+    // from/to pc: get or revise pc
+    output reg pc_en_o,
+    output reg pc_rev_en_o,
+    output reg [`RAM_ADR_W-1:0] pc_rev_o,
+    input [`RAM_ADR_W-1:0] pc_i
 );
 
   /*
@@ -55,7 +61,7 @@ reply--if cache_en,put cache_ins_in to
           ins_call <= 0;  // 不到要不要手动关闭请求
           if (cache_en) begin
             ins_call <= 0;
-            ins_out <= cache_ins_in;// 这就是issue了
+            ins_out <= cache_ins_in;  // 这就是issue了
             ins_ok <= 1;
             t_state <= 0;
             busy <= 0;

@@ -28,15 +28,15 @@ module register_file (
 
     // to ROB
     output reg rob_en_o,
-    output reg rob_qj_o,
-    output reg rob_qk_o,
-    output reg rob_vj_o,
-    output reg rob_vk_o,
-    output reg rob_qd_o,  //
+    output reg [`ROB_BIT-1:0] rob_qj_o,
+    output reg [`ROB_BIT-1:0] rob_qk_o,
+    output reg [`DAT_W-1:0] rob_vj_o,
+    output reg [`DAT_W-1:0] rob_vk_o,
+    output reg [`ROB_BIT-1:0] rob_qd_o,
 
     //RS 相关数据走个过场交给ROB，由ROB交给RS
-    output reg rob_op_o,
-    output reg rob_imm_o
+    output reg [ `OP_W-1:0] rob_op_o,
+    output reg [`DAT_W-1:0] rob_imm_o
 
     // 不需要接触CDB，因为只有ROB commit后才修改值
     // ALU依赖RS而不依赖RF，RS也不需要RF而只需要总线

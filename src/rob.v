@@ -5,7 +5,7 @@
 // call them stop and digest! then tell pc to jump
 `include "utils/head.v"
 
-module rob (
+module reorder_buffer (
     input clk,
     input rst,
     input en,
@@ -55,8 +55,8 @@ module rob (
     // from CDB
     input cdb_en_i,
     input [`ROB_BIT - 1:0] cdb_q_i,
-    input [`REG_DAT_W - 1:0] cdb_v_i,
-    input [`REG_DAT_W - 1:0] cdb_br_to_i,  // 算出来的指令跳转地址
+    input [`DAT_W - 1:0] cdb_v_i,
+    input [`RAM_ADR_W - 1:0] cdb_br_to_i,  // 算出来的指令跳转地址
 
     //Commit
     output reg rf_en_o,

@@ -4,10 +4,10 @@
 module program_counter(
     input clk,
     input rst,
-
     input en,
-    input read_en,
-    input revise_en,
+
+    input read_en_i,
+    input rev_en_i,
     input [`RAM_ADR_W-1:0] rev_pc_i,
 
     output reg [`RAM_ADR_W-1:0] pc_o
@@ -18,9 +18,9 @@ always @(posedge clk or negedge rst) begin
   if(rst)begin
     pc_o <= 0;
   end else if(en) begin
-    if(read_en)begin
+    if(read_en_i)begin
       //TODO 需要控制在成功read之后再revise，或许read_en就是干这个的
-      if(revise_en)pc_o<=rev_pc_i;
+      if(rev_en_i)pc_o<=rev_pc_i;
       else pc_o<=pc_o+4;
     end
   end
