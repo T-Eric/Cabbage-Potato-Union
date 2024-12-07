@@ -11,28 +11,34 @@ module register_file (
 
     input en,  // full control
 
-    // from ins_fetch issue, come for values and qs
+    // from decoder, come for values and qs
     input is_en_i,
+    input is_ic_i,
+    input [1:0] is_tp_i,
     input [`REG_BIT-1:0] is_rd_i,
     input [`REG_BIT-1:0] is_rs1_i,
     input [`REG_BIT-1:0] is_rs2_i,
     input [`OP_W-1:0] is_op_i,
     input [`DAT_W-1:0] is_imm_i,
-    input [`ROB_BIT-1:0] is_rob_qd_i,
+    input [`RAM_ADR_W-1:0] is_pc_i,
 
     // from ROB, to revise
     input rob_en_i,
     input [`REG_BIT-1:0] rob_rd_i,
     input [`ROB_BIT-1:0] rob_q_i,
     input [`DAT_W-1:0] rob_v_i,
+    input [`ROB_BIT-1:0] rob_qd_i,
 
     // to ROB
     output reg rob_en_o,
+    output reg rob_ic_o,
+    output reg rob_ls_o,  // 0 L 1 S 
     output reg [`ROB_BIT-1:0] rob_qj_o,
     output reg [`ROB_BIT-1:0] rob_qk_o,
     output reg [`DAT_W-1:0] rob_vj_o,
     output reg [`DAT_W-1:0] rob_vk_o,
     output reg [`ROB_BIT-1:0] rob_qd_o,
+    output reg [`RAM_ADR_W-1:0] rob_pc_o,
 
     //RS 相关数据走个过场交给ROB，由ROB交给RS
     output reg [ `OP_W-1:0] rob_op_o,
@@ -47,7 +53,7 @@ module register_file (
   reg [`DAT_W-1:0] regs[`REG_S-1:0];
   integer i;
 
-  always @(posedge clk or negedge rst) begin
+  always @(posedge clk) begin
     if (rst) begin
       for (i = 0; i < 32; i = i + 1) begin
         regs[i] <= 0;
@@ -65,28 +71,27 @@ module register_file (
 
       if (is_en_i) begin
         // passer-by
+        rob_en_o   <= 1;
+        rob_ic_o   <= is_ic_i;
+        rob_ls_o   <= is_tp_i == 2'b10 || is_tp_i == 2'b01;
         rob_op_o   <= is_op_i;
         rob_imm_o  <= is_imm_i;
         rob_vj_o   <= regs[is_rs1_i];
         rob_vk_o   <= regs[is_rs2_i];
-
-        rob_en_o   <= 1;
-
         rob_qj_o   <= q[is_rs1_i];
         rob_qk_o   <= q[is_rs2_i];
+        rob_pc_o   <= is_pc_i;
 
-        // TODO 考虑rs=rd时的ROB id
-        // issue先问rob要一个空位，为rd给一个新的rob id
-        // 相当于rename
+        // rob_qd_i=rob's ctail
         rob_qj_o   <= q[is_rs1_i];
         rob_qk_o   <= q[is_rs2_i];
-        q[is_rd_i] <= is_rob_qd_i;
-        rob_qd_o   <= is_rob_qd_i;
+        q[is_rd_i] <= rob_qd_i;
+        rob_qd_o   <= rob_qd_i;
       end
     end
   end
 
-  always @(posedge clk or negedge rst) begin
+  always @(posedge clk) begin
     if (en) begin
       regs[0] <= 0;
       q[0] <= 0;

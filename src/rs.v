@@ -4,148 +4,142 @@
 
 // 
 `include "utils/head.v"
-`include "common/fifo/fifo.v"
 
 module reser_station (
     input clk,
     input rst,
     input en,
 
-    // basic info, from/to ins_fetch, RF, ROB
-    input ins_info_en,  // call me save stalled ins from ins_fetch
-    input rob_index_en,  // call me save the index from ROB
-    input [2:0] tp_in,
-    input [`INSSET_BIT-1:0] op_in,
-    input [`ROB_BIT-1:0] qj_in,  // former ins' ROB entry tag, 0 means no
-    input [`ROB_BIT-1:0] qk_in,
-    input [`DAT_W-1:0] vj_in,  // real data to be used, rs1
-    input [`DAT_W-1:0] vk_in,  // rs2, load/store src reg
-    input [`DAT_W-1:0] imm_i,
-    input [`ROB_BIT-1:0] dest_in,  // index of ins in ROB, from ROB
-    output reg full,  //tell them whether full, both then insert 
-    output reg insert_ok,  // tell them whether ok
+    // from rob: one item
+    input rob_en_i,
+    input [`OP_W-1:0] rob_op_i,
+    input rob_ic_i,  //0 I 1 C 
+    input [`ROB_BIT-1:0] rob_qj_i,
+    input [`ROB_BIT-1:0] rob_qk_i,
+    input [`DAT_W-1:0] rob_vj_i,
+    input [`DAT_W-1:0] rob_vk_i,
+    input [`ROB_BIT-1:0] rob_qd_i,
+    input [`DAT_W-1:0] rob_imm_i,
+    input [`RAM_ADR_W-1:0] rob_pc_i,
 
-    // from/to ALU: if one instruction is ready()
-    input alu_ready,  // alu tell me it's ready?
-    output alu_en_out,
-    output [`DAT_W-1:0] alu_lhs_out,
-    output [`DAT_W-1:0] alu_rhs_out,
-    output [`INSSET_BIT-1:0] alu_op_out,
-    output [2:0] alu_tp_out,
+    // from lsb/cdb: updator
+    input lsb_en_i,
+    input [`ROB_BIT-1:0] lsb_q_i,
+    input [`DAT_W-1:0] lsb_v_i,
+    input cdb_en_i,
+    input [`ROB_BIT-1:0] cdb_q_i,
+    input [`DAT_W-1:0] cdb_v_i,
 
+    // to alu: calc
+    output alu_en_o,
+    output [`OP_W-1:0] alu_op_o,
+    output alu_ic_o,
+    output [`ROB_BIT-1:0] alu_qd_o,
+    output [`DAT_W-1:0] alu_vs_o,
+    output [`DAT_W-1:0] alu_vt_o,
+    output [`DAT_W-1:0] alu_imm_o,
+    output [`RAM_ADR_W-1:0] alu_pc_o,
 
-    // from/to CDB: ALU->ROB->RS/RF
-    input cdb_rs_en,  // one signal from rob and alu 
-    input [`ROB_BIT-1:0] cdb_rob_id_in,
-    input [`REG_BIT-1:0] cdb_rd_in,
-    input [`DAT_W-1:0] cdb_data_in
+    // branch
+    input br_flag
 );
 
-  reg [`RS_S-1:0] busy;
-  reg [`RS_S-1:0] send;  // must busy, this ins has sent to calc
-  reg [`INSSET_BIT-1:0] op[`RS_S-1:0];
-  reg [2:0] tp[`RS_S-1:0];
+  reg busy[`RS_S-1:0];
+  wire send[`RS_S-1:0];
+  reg [`OP_W-1:0] op[`RS_S-1:0];
+  reg ic[`RS_S-1:0];
   reg [`DAT_W-1:0] vj[`RS_S-1:0];
   reg [`DAT_W-1:0] vk[`RS_S-1:0];
-  reg [`DAT_W-1:0] ad[`RS_S-1:0];
+  reg [`DAT_W-1:0] imm[`RS_S-1:0];
+  reg [`RAM_ADR_W-1:0] pc[`RS_S-1:0];
   reg [`ROB_BIT-1:0] qj[`RS_S-1:0];
   reg [`ROB_BIT-1:0] qk[`RS_S-1:0];
-  reg [`ROB_BIT-1:0] dest[`RS_S-1:0];
+  reg [`ROB_BIT-1:0] qd[`RS_S-1:0];
 
-  reg [1:0] c_state, t_state;
-  integer i;
+  // TA启发：组合逻辑找第一个空entry，第一个可送entry
+  // 参考https://zhuanlan.zhihu.com/p/647874179
+  // 直接把alu_o连接到可送entry条目是可行且很快的
+  wire [`RS_BIT-1:0] empty_one, send_one, empty_find[`RS_S:0], send_find[`RS_S:0];
+  assign empty_find[0] = 0;
+  assign send_find[0] = 0;
+  assign empty_one = empty_find[`RS_S];
+  assign send_one = send_find[`RS_S];
+  assign alu_en_o = send[0] == 1 || send_one != 0;
+  assign alu_op_o = op[send_one];
+  assign alu_ic_o = ic[send_one];
+  assign alu_qd_o = qd[send_one];
+  assign alu_vs_o = vj[send_one];
+  assign alu_vt_o = vk[send_one];
+  assign alu_imm_o = imm[send_one];
+  assign alu_pc_o = pc[send_one];
 
-  // pre-find one empty place
-  reg [`RS_BIT-1:0] pre_empty_id;
-  reg found_id;
-  always @(posedge clk or negedge rst) begin
-    if (rst) begin
-      pre_empty_id <= 0;
-      busy <= 0;
-    end else if (en && !full) begin
-      full = &busy;
-      for (i = pre_empty_id; i < `RS_S; i = i + 1) begin
-        if (!busy[i] && !found_id) begin
-          pre_empty_id = i;
-          found_id = 1;
-        end
-      end
-      if (!found_id) begin
-        for (i = 0; i <= pre_empty_id; i = i + 1) begin
-          if (!busy[i] && !found_id) begin
-            pre_empty_id = i;
-            found_id = 1;
-          end
-        end
-      end
+  genvar j;
+  generate
+    for (j = 0; j < `RS_S; j = j + 1) begin
+      assign send[j] = busy[j] && qj[j] == 0 && qk[j] == 0;
+      assign send_find[j+1] = send[j] ? j : send_find[j];
+      assign empty_find[j+1] = busy[j] ? empty_find[j] : j;
     end
-  end
+  endgenerate
 
-  // write_in
-  always @(posedge clk or negedge rst) begin
-    if (rst) begin
-      busy <= 0;
+  integer i;
+  always @(posedge clk) begin
+    if (rst || br_flag) begin
       for (i = 0; i < `RS_S; i = i + 1) begin
+        busy[i] <= 0;
         op[i]   <= 0;
-        tp[i]   <= 0;
+        ic[i]   <= 0;
         vj[i]   <= 0;
         vk[i]   <= 0;
-        ad[i]   <= 0;
+        imm[i]  <= 0;
         qj[i]   <= 0;
         qk[i]   <= 0;
-        dest[i] <= 0;
+        qd[i]   <= 0;
+        pc[i]   <= 0;
       end
     end else if (en) begin
-      // TODO 将新的指令放入空槽
-      // TODO 根据指令类型放东西，对于32(R2)的偏移类，直接组合逻辑计算后丢进
-      // vk 或 A。之后编写时若立刻算出就不用A了，否则要用A。
-      //----------
-      // watch cdb and update qvjk
-      if (cdb_rs_en) begin
+      // non-load-store instruction
+      if (rob_en_i) begin
+        busy[empty_one] <= 1;
+        op[empty_one]   <= rob_op_i;
+        ic[empty_one]   <= rob_ic_i;
+        vj[empty_one]   <= rob_vj_i;
+        vk[empty_one]   <= rob_vk_i;
+        imm[empty_one]  <= rob_imm_i;
+        qj[empty_one]   <= rob_qj_i;
+        qk[empty_one]   <= rob_qk_i;
+        qd[empty_one]   <= rob_qd_i;
+        pc[empty_one]   <= rob_pc_i;
+      end
+
+      // updators
+      if (lsb_en_i) begin
         for (i = 0; i < `RS_S; i = i + 1) begin
-          if (busy[i] && qj[i] == cdb_rob_id_in) begin
-            vj[i] <= cdb_data_in;
+          if (qj[i] == lsb_q_i) begin
             qj[i] <= 0;
+            vj[i] <= lsb_v_i;
           end
-          if (busy[i] && qk[i] == cdb_rob_id_in) begin
-            vk[i] <= cdb_data_in;
+          if (qk[i] == lsb_q_i) begin
             qk[i] <= 0;
-            // TODO load和store的更新逻辑
+            vk[i] <= lsb_v_i;
           end
         end
       end
-    end
-  end
-
-  // send to ALU
-  always @(posedge clk or negedge rst) begin
-    if (rst) begin
-      send <= 0;
-    end else if (en) begin
-      for (i = 0; i < `RS_S; i = i + 1) begin
-        if (qj[i] == 0 && qk[i] == 0 && !send[i] && alu_ready) begin
-          // TODO：根据不同指令类型，取数送到ALU
-          send[i] <= 1;
+      if (cdb_en_i) begin
+        for (i = 0; i < `RS_S; i = i + 1) begin
+          if (qj[i] == cdb_q_i) begin
+            qj[i] <= 0;
+            vj[i] <= cdb_v_i;
+          end
+          if (qk[i] == cdb_q_i) begin
+            qk[i] <= 0;
+            vk[i] <= cdb_v_i;
+          end
         end
       end
-    end
-  end
 
-  // watch CDB, ready to reset busy and send
-  // TODO：我们暂且认为CDB提供的rob_id唯一指代RS中的一个entry
-  always @(posedge clk or negedge rst) begin
-    if (rst) begin
-      //
-    end else if (en && cdb_rs_en) begin
-      // TODO 这个过程可能更复杂，不知道要不要CDB全程记录RS中的id
-      // TODO 现在认为是，cdb_rs_en由ALU和ROB共同控制，所以dest[i]准确
-      for (i = 0; i < `RS_S; i = i + 1) begin
-        if (cdb_rob_id_in == dest[i] && send[i]) begin
-          send[i] <= 0;
-          busy[i] <= 0;
-          dest[i] <= 0;
-        end
-      end
+      // given for alu
+      if (alu_en_o) busy[send_one] = 0;
     end
   end
 

@@ -22,7 +22,7 @@ module data_cache (
 
     // from/to memory io control
     input mc_en_i,  // mc ready to write
-    input mc_dat_i,
+    input [`DAT_W-1:0] mc_dat_i,
     output reg mc_en_o,  // call mc to rw
     output reg mc_rwen_o,  // READ 1 WRITE 0
     output reg [2:0] mc_len_o,
@@ -30,7 +30,7 @@ module data_cache (
     output reg [`DAT_W-1:0] mc_dat_o,
 
     // from ROB, branching
-    input rob_br_flag
+    input br_flag
 );
 
   always @(posedge clk) begin
@@ -61,7 +61,7 @@ module data_cache (
     end
 
     // br>en
-    if (!rst && rob_br_flag && lsb_en_i && lsb_rwen_i) begin
+    if (!rst && br_flag && lsb_en_i && lsb_rwen_i) begin
       // lsb calling to read
       mc_rwen_o <= lsb_rwen_i;
       mc_len_o  <= lsb_len_i;
