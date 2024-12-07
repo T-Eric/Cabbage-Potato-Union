@@ -23,6 +23,8 @@
 *
 *  Circular first in first out buffer implementation.
 ***************************************************************************************************/
+`ifndef FIFO_V
+`define FIFO_V
 
 module fifo
 #(
@@ -108,3 +110,4 @@ assign empty   = q_empty;
 
 endmodule
 
+`endif

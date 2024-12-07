@@ -3,8 +3,9 @@
 // Function: FIFO queue, get and commit ins in order
 // if need branching, raise flag_br, send to lsb, fet and rs
 // call them stop and digest! then tell pc to jump
-`include "utils/head.v"
-// TODO branch相关，cdb相关，需要更新一些逻辑
+`include "src/head.v"
+`ifndef ROB_V
+`define ROB_V
 
 module reorder_buffer (
     input clk,
@@ -259,14 +260,13 @@ module reorder_buffer (
                 br_tpc  <= pc[chead];
                 br_abr  <= cbr[chead];
                 br_bt   <= cbt[chead];
-              end else begin
-                rf_en_o <= 1;
-                rf_rd_o <= rd[chead];
-                rf_q_o  <= chead;
-                rf_v_o  <= v[chead];
-                // TODO 不跳转要提交吗？其实应该不用吧？好吧其实也是要的
-                // 但是除了JALR之外不会有什么影响就是了
               end
+              rf_en_o <= 1;
+              rf_rd_o <= rd[chead];
+              rf_q_o  <= chead;
+              rf_v_o  <= v[chead];
+              // TODO 不跳转要提交吗？其实应该不用吧？好吧其实也是要的
+              // 但是除了JALR之外不会有什么影响就是了
             end
             2'b01: begin
               // store交给LSB去Commit
@@ -297,3 +297,5 @@ module reorder_buffer (
   end
 
 endmodule
+
+`endif

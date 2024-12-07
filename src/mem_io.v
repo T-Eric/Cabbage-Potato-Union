@@ -1,8 +1,9 @@
 // Memory IO Controller
 // Connect: ic, dc
 // Function: directly connect ram, read according to different modes
-`include "utils/head.v"
-
+`include "src/head.v"
+`ifndef MC_V
+`define MC_V
 
 module memory_io_controller (
     input clk,
@@ -148,3 +149,5 @@ module memory_io_controller (
   end
 
 endmodule
+
+`endif

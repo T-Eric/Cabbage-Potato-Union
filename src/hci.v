@@ -26,7 +26,9 @@
 ***************************************************************************************************/
 
 // modification allowed for debugging purposes
-`include "common/uart/uart.v"
+`include "src/common/uart/uart.v"
+`ifndef HCI_V
+`define HCI_V
 
 module hci
 #(
@@ -582,3 +584,5 @@ assign ram_dout    = rd_data;
 assign io_dout     = q_io_dout;
 
 endmodule
+
+`endif

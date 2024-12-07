@@ -1,11 +1,10 @@
 // Instruction Fetcher
 // Connect: ins_cache,decoder
-// Function: 
-`include "utils/head.v"
-// TODO branch-about things, 且jalr和jr是必定跳转的应该不需要预测就是了
-// TODO 不对，还是要预测，不然就不知道下一步跳到哪了
+// Function: fetch, judge rv32i or c, then issue to rf and rob
+`include "src/head.v"
+`ifndef IF_V
+`define IF_V
 
-// 大TODO 怎么分辨传进来的是32位指令还是
 module ins_fetch (
     input clk,
     input rst,
@@ -70,7 +69,8 @@ module ins_fetch (
   assign is_ins_o = ic_ins_i;
   assign is_ic_o = ins_ic;
 
-  // jalr, c.jr, c.jalr，不预测
+  // jalr, c.jr, c.jalr，不预测，不跳转，也就是必定mispredict
+
   assign is_pbr_o = bp_br_i;
 
   always @(posedge clk) begin
@@ -136,3 +136,5 @@ module ins_fetch (
   end
 
 endmodule
+
+`endif 

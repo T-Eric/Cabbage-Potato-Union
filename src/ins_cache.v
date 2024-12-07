@@ -1,7 +1,9 @@
 // Instruction Cache, 2-way set-associative cache
 // Connect: mem_io,ins_fetch,pc
 // Function: directly give the right instruction according to the cpu_in
-`include "utils/head.v"
+`include "src/head.v"
+`ifndef IC_V
+`define IC_V
 
 module ins_cache (
     input clk,
@@ -120,3 +122,5 @@ module ins_cache (
   end
 
 endmodule
+
+`endif

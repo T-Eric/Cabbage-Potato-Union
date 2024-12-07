@@ -25,6 +25,8 @@
 *  Generates a tick signal at OVERSAMPLE_RATE times the baud rate.  Should be fed to the uart_rx
 *  and uart_tx blocks.
 ***************************************************************************************************/
+`ifndef UART_BAUD_CLK_V
+`define UART_BAUD_CLK_V
 
 module uart_baud_clk
 #(
@@ -57,3 +59,4 @@ assign baud_clk_tick = (q_cnt == (CLKS_PER_OVERSAMPLE_TICK - 1)) ? 1'b1     : 1'
 
 endmodule
 
+`endif

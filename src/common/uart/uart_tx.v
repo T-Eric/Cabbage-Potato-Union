@@ -24,6 +24,8 @@
 *
 *  UART transmitter.
 ***************************************************************************************************/
+`ifndef UART_TX_V
+`define UART_TX_V
 
 module uart_tx
 #(
@@ -177,3 +179,4 @@ assign tx_done_tick = q_tx_done_tick;
 
 endmodule
 
+`endif 

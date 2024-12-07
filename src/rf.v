@@ -1,9 +1,8 @@
 // Register File, 32 registers
 
-// 还没有对同步读写做适配
-// 还没有与ROB联动
-
-`include "utils/head.v"
+`include "src/head.v"
+`ifndef RF_V
+`define RF_V
 
 module register_file (
     input clk,
@@ -98,3 +97,5 @@ module register_file (
     end
   end
 endmodule
+
+`endif

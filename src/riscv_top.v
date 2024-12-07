@@ -1,8 +1,10 @@
 // riscv top module file
 // modification allowed for debugging purposes
-`include "ram.v"
-`include "cpu.v"
-`include "hci.v"
+`include "src/ram.v"
+`include "src/cpu.v"
+`include "src/hci.v"
+`ifndef RISCV_TOP_V
+`define RISCV_TOP_V
 
 module riscv_top #(
     parameter SIM = 0  // whether in simulation
@@ -167,3 +169,5 @@ module riscv_top #(
   assign hci_ram_din = ram_dout;
 
 endmodule
+
+`endif

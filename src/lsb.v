@@ -1,6 +1,8 @@
 // load-store buffer
 // Function: FIFO sender, react with dc to store and load
-`include "utils/head.v"
+`include "src/head.v"
+`ifndef LSB_V
+`define LSB_V
 
 // 接受所有的load和store指令（一定会stall）
 module load_store_buffer (
@@ -222,3 +224,5 @@ module load_store_buffer (
 
 
 endmodule
+
+`endif

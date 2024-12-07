@@ -1,18 +1,21 @@
 // RISCV32 CPU top module
 // port modification allowed for debugging purposes
-`include "utils/head.v"
-`include "alu.v"
-`include "bp.v"
-`include "data_cache.v"
-`include "decoder.v"
-`include "ins_cache.v"
-`include "ins_fetch.v"
-`include "lsb.v"
-`include "mem_io.v"
-`include "ram.v"
-`include "rf.v"
-`include "rob.v"
-`include "rs.v"
+// `include "src/head.v"
+`include "src/alu.v"
+`include "src/bp.v"
+`include "src/data_cache.v"
+`include "src/decoder.v"
+`include "src/ins_cache.v"
+`include "src/ins_fetch.v"
+`include "src/lsb.v"
+`include "src/mem_io.v"
+`include "src/ram.v"
+`include "src/rf.v"
+`include "src/rob.v"
+`include "src/rs.v"
+
+`ifndef CPU_V
+`define CPU_V
 
 module cpu (
     input wire clk_in,  // system clock signal
@@ -530,3 +533,5 @@ module cpu (
   //   end
 
 endmodule
+
+`endif

@@ -4,7 +4,9 @@
 // if need branching, force all pending writes
 // 实际上没有起到一个cache的作用，只是作为一个中间者传递数据
 // 因为同时涉及读写，不能像ins那样直接cache（自己就修改疯了）
-`include "utils/head.v"
+`include "src/head.v"
+`ifndef DC_V
+`define DC_V
 
 module data_cache (
     input clk,
@@ -73,3 +75,5 @@ module data_cache (
   end
 
 endmodule
+
+`endif

@@ -1,5 +1,7 @@
 // Arithmetic, maybe many(as Execution Unit)
-`include "utils/head.v"
+`include "src/head.v"
+`ifndef ALU_V
+`define ALU_V
 
 module arith_logic_unit (
     input clk,
@@ -69,14 +71,33 @@ module arith_logic_unit (
           `JAL:    v <= ic ? pc + 2 : pc + 4;  // 存进寄存器的
           `JALR: begin
             v   <= ic ? pc + 2 : pc + 4;
-            cbr <= vs + imm;
+            cbr <= 1;
+            cbt <= (vs + imm) & (~1);
           end
-          `BEQ:    cbr <= vs == vt ? pc + imm : ic ? pc + 2 : pc + 4;
-          `BNE:    cbr <= vs != vt ? pc + imm : ic ? pc + 2 : pc + 4;
-          `BLT:    cbr <= $signed(vs) < $signed(vt) ? pc + imm : ic ? pc + 2 : pc + 4;
-          `BGE:    cbr <= $signed(vs) >= $signed(vt) ? pc + imm : ic ? pc + 2 : pc + 4;
-          `BLTU:   cbr <= vs < vt ? pc + imm : ic ? pc + 2 : pc + 4;
-          `BGEU:   cbr <= vs >= vt ? pc + imm : ic ? pc + 2 : pc + 4;
+          `BEQ: begin
+            cbr <= vs == vt;
+            cbt <= vs == vt ? pc + imm : ic ? pc + 2 : pc + 4;
+          end
+          `BNE: begin
+            cbr <= vs != vt;
+            cbt <= vs != vt ? pc + imm : ic ? pc + 2 : pc + 4;
+          end
+          `BLT: begin
+            cbr <= $signed(vs) < $signed(vt);
+            cbt <= $signed(vs) < $signed(vt) ? pc + imm : ic ? pc + 2 : pc + 4;
+          end
+          `BGE: begin
+            cbr <= $signed(vs) >= $signed(vt);
+            cbt <= $signed(vs) >= $signed(vt) ? pc + imm : ic ? pc + 2 : pc + 4;
+          end
+          `BLTU: begin
+            cbr <= vs < vt;
+            cbt <= vs < vt ? pc + imm : ic ? pc + 2 : pc + 4;
+          end
+          `BGEU: begin
+            cbr <= vs >= vt;
+            cbt <= vs >= vt ? pc + imm : ic ? pc + 2 : pc + 4;
+          end
           `ADDI:   v <= vs + imm;
           `SLLI:   v <= vs << imm;
           `SLTI:   v <= ($signed(vs) < $signed(imm)) ? 1 : 0;
@@ -103,3 +124,5 @@ module arith_logic_unit (
   end
 
 endmodule
+
+`endif

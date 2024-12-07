@@ -1,5 +1,7 @@
 // implements 128KB of on-board RAM
-`include "common/block_ram/block_ram.v"
+`include "src/common/block_ram/block_ram.v"
+`ifndef RAM_V
+`define RAM_V
 
 module ram #(
     parameter ADDR_WIDTH = 17
@@ -30,3 +32,5 @@ module ram #(
   assign d_out       = ram_bram_dout;
 
 endmodule
+
+`endif

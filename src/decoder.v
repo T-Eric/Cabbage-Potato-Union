@@ -1,7 +1,9 @@
 // Decoder
 // Connect: Ins-Fetch, 
 // Function: Decode the ins from IC, then Issue. Careless about branching.
-`include "utils/head.v"
+`include "src/head.v"
+`ifndef DEC_V
+`define DEC_V
 
 module decoder (
     input clk,
@@ -41,6 +43,7 @@ module decoder (
   reg [1:0] tp;  // 0 branch 1 load 2 store 3 alu-operations
   reg [`DAT_W-1:0] imm;
   reg [`REG_BIT-1:0] rd, rs1, rs2;
+  reg pbr;  // 由于jalr这种煞笔存在，需要特别安排
 
   assign rf_op_o   = op;
   assign rf_ic_o   = if_ic_i;
@@ -55,7 +58,7 @@ module decoder (
   assign rob_tp_o  = tp;
   assign rob_rd_o  = rd;
   assign rob_pc_o  = if_pc_i;
-  assign rob_pbr_o = if_pbr_i;
+  assign rob_pbr_o = pbr;
 
   assign rf_en_o   = if_en_i;
   assign rob_en_o  = if_en_i;
@@ -93,6 +96,7 @@ module decoder (
     end
 
     ins = if_ins_i;
+    pbr = if_pbr_i;
 
     if (if_ic_i) begin
       // RV32C instructions
@@ -230,6 +234,7 @@ module decoder (
                   rs2 = 0;
                   imm = 0;
                   op  = `JALR;
+                  pbr = 0;
                 end else begin  // c.mv
                   rd  = crd;
                   rs1 = 0;
@@ -245,6 +250,7 @@ module decoder (
                   rs2 = 0;
                   imm = 0;
                   op  = `JALR;
+                  pbr = 0;
                 end else begin  // c.add
                   rd  = crd;
                   rs1 = crs1;
@@ -312,8 +318,9 @@ module decoder (
         7'b0010111: op = `AUIPC;  // AUIPC
         7'b1101111: op = `JAL;  // JAL, not branch
         7'b1100111: begin  // JALR, branch
-          tp = 0;
-          op = `JALR;
+          tp  = 0;
+          op  = `JALR;
+          pbr = 0;
         end
         7'b1100011: begin
           tp = 0;
@@ -378,3 +385,5 @@ module decoder (
 
 
 endmodule
+
+`endif
