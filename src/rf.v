@@ -128,44 +128,44 @@ module register_file (
       imm_o <= 0;
     end else if (en) begin
       //---debug---
-      // if (rob_en_i) begin
-      //   $write("zr:%h\t", regs[0]);
-      //   $write("ra:%h\t", regs[1]);
-      //   $write("sp:%h\t", regs[2]);
-      //   $write("gp:%h\t", regs[3]);
-      //   $write("tp:%h\t", regs[4]);
-      //   $write("t0:%h\t", regs[5]);
-      //   $write("t1:%h\t", regs[6]);
-      //   $write("t2:%h\t", regs[7]);
-      //   $display("");
-      //   $write("s0:%h\t", regs[8]);
-      //   $write("s1:%h\t", regs[9]);
-      //   $write("a0:%h\t", regs[10]);
-      //   $write("a1:%h\t", regs[11]);
-      //   $write("a2:%h\t", regs[12]);
-      //   $write("a3:%h\t", regs[13]);
-      //   $write("a4:%h\t", regs[14]);
-      //   $write("a5:%h\t", regs[15]);
-      //   $display("");
-      //   $write("a6:%h\t", regs[16]);
-      //   $write("a7:%h\t", regs[17]);
-      //   $write("s2:%h\t", regs[18]);
-      //   $write("s3:%h\t", regs[19]);
-      //   $write("s4:%h\t", regs[20]);
-      //   $write("s5:%h\t", regs[21]);
-      //   $write("s6:%h\t", regs[22]);
-      //   $write("s7:%h\t", regs[23]);
-      //   $display("");
-      //   $write("s8:%h\t", regs[24]);
-      //   $write("s9:%h\t", regs[25]);
-      //   $write("10:%h\t", regs[26]);
-      //   $write("11:%h\t", regs[27]);
-      //   $write("t3:%h\t", regs[28]);
-      //   $write("t4:%h\t", regs[29]);
-      //   $write("t5:%h\t", regs[30]);
-      //   $write("t6:%h\t", regs[31]);
-      //   $display("");
-      // end
+      if (rob_en_i) begin
+        $write("zr:%h\t", regs[0]);
+        $write("ra:%h\t", regs[1]);
+        $write("sp:%h\t", regs[2]);
+        $write("gp:%h\t", regs[3]);
+        $write("tp:%h\t", regs[4]);
+        $write("t0:%h\t", regs[5]);
+        $write("t1:%h\t", regs[6]);
+        $write("t2:%h\t", regs[7]);
+        $display("");
+        $write("s0:%h\t", regs[8]);
+        $write("s1:%h\t", regs[9]);
+        $write("a0:%h\t", regs[10]);
+        $write("a1:%h\t", regs[11]);
+        $write("a2:%h\t", regs[12]);
+        $write("a3:%h\t", regs[13]);
+        $write("a4:%h\t", regs[14]);
+        $write("a5:%h\t", regs[15]);
+        $display("");
+        $write("a6:%h\t", regs[16]);
+        $write("a7:%h\t", regs[17]);
+        $write("s2:%h\t", regs[18]);
+        $write("s3:%h\t", regs[19]);
+        $write("s4:%h\t", regs[20]);
+        $write("s5:%h\t", regs[21]);
+        $write("s6:%h\t", regs[22]);
+        $write("s7:%h\t", regs[23]);
+        $display("");
+        $write("s8:%h\t", regs[24]);
+        $write("s9:%h\t", regs[25]);
+        $write("10:%h\t", regs[26]);
+        $write("11:%h\t", regs[27]);
+        $write("t3:%h\t", regs[28]);
+        $write("t4:%h\t", regs[29]);
+        $write("t5:%h\t", regs[30]);
+        $write("t6:%h\t", regs[31]);
+        $display("");
+      end
       //---debug---
       lsb_en_o <= 0;
       rs_en_o  <= 0;
