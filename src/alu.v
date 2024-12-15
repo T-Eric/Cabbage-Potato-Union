@@ -16,14 +16,14 @@ module arith_logic_unit (
     input [`DAT_W-1:0] rs_vs_i,
     input [`DAT_W-1:0] rs_vt_i,
     input [`DAT_W-1:0] rs_imm_i,
-    input [`RAM_ADR_W-1:0] rs_pc_i,
+    input [`DAT_W-1:0] rs_pc_i,
 
     // to cdb: the result and the q
     output reg cdb_en_o,
     output [`ROB_BIT-1:0] cdb_q_o,
     output [`DAT_W-1:0] cdb_v_o,
     output cdb_cbr_o,  // calculated branch or not
-    output [`RAM_ADR_W-1:0] cdb_cbt_o  // calced branch-to
+    output [`DAT_W-1:0] cdb_cbt_o  // calced branch-to
 );
   // cdb outputs 
   reg [`ROB_BIT-1:0] q;
@@ -33,12 +33,12 @@ module arith_logic_unit (
   assign cdb_q_o   = q;
   assign cdb_v_o   = v;
   assign cdb_cbr_o = cbr;
-  assign cdb_cbt_o = cbt[`RAM_ADR_W-1:0];
+  assign cdb_cbt_o = cbt;
 
   wire [`DAT_W-1:0] pc, vs, vt, imm;
   wire [`OP_W-1:0] op;
   wire ic;
-  assign pc  = {15'b0, rs_pc_i};  //32-17
+  assign pc  = rs_pc_i;  //32-17
   assign vs  = rs_vs_i;
   assign vt  = rs_vt_i;
   assign imm = rs_imm_i;
@@ -54,10 +54,10 @@ module arith_logic_unit (
       cbt <= 0;
     end else if (en) begin
       cdb_en_o <= 0;
-      q <= 0;
-      v <= 0;
-      cbr <= 0;
-      cbt <= 0;
+      // q <= 0;
+      // v <= 0;
+      // cbr <= 0;
+      // cbt <= 0;
 
       if (rs_en_i) begin
         cdb_en_o <= 1;

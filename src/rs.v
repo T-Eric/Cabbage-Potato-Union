@@ -12,16 +12,16 @@ module reser_station (
     input en,
 
     // from rob: one item
-    input rob_en_i,
-    input [`OP_W-1:0] rob_op_i,
-    input rob_ic_i,  //0 I 1 C 
-    input [`ROB_BIT-1:0] rob_qj_i,
-    input [`ROB_BIT-1:0] rob_qk_i,
-    input [`DAT_W-1:0] rob_vj_i,
-    input [`DAT_W-1:0] rob_vk_i,
-    input [`ROB_BIT-1:0] rob_qd_i,
-    input [`DAT_W-1:0] rob_imm_i,
-    input [`RAM_ADR_W-1:0] rob_pc_i,
+    input rf_en_i,
+    input [`OP_W-1:0] rf_op_i,
+    input rf_ic_i,  //0 I 1 C 
+    input [`ROB_BIT-1:0] rf_qj_i,
+    input [`ROB_BIT-1:0] rf_qk_i,
+    input [`DAT_W-1:0] rf_vj_i,
+    input [`DAT_W-1:0] rf_vk_i,
+    input [`ROB_BIT-1:0] rf_qd_i,
+    input [`DAT_W-1:0] rf_imm_i,
+    input [`DAT_W-1:0] rf_pc_i,
 
     // from lsb/cdb: updator
     input lsb_en_i,
@@ -39,7 +39,7 @@ module reser_station (
     output [`DAT_W-1:0] alu_vs_o,
     output [`DAT_W-1:0] alu_vt_o,
     output [`DAT_W-1:0] alu_imm_o,
-    output [`RAM_ADR_W-1:0] alu_pc_o,
+    output [`DAT_W-1:0] alu_pc_o,
 
     // branch
     input br_flag
@@ -52,7 +52,7 @@ module reser_station (
   reg [`DAT_W-1:0] vj[`RS_S-1:0];
   reg [`DAT_W-1:0] vk[`RS_S-1:0];
   reg [`DAT_W-1:0] imm[`RS_S-1:0];
-  reg [`RAM_ADR_W-1:0] pc[`RS_S-1:0];
+  reg [`DAT_W-1:0] pc[`RS_S-1:0];
   reg [`ROB_BIT-1:0] qj[`RS_S-1:0];
   reg [`ROB_BIT-1:0] qk[`RS_S-1:0];
   reg [`ROB_BIT-1:0] qd[`RS_S-1:0];
@@ -100,20 +100,43 @@ module reser_station (
       end
     end else if (en) begin
       // non-load-store instruction
-      if (rob_en_i) begin
+      if (rf_en_i) begin
+        // TODO 传入值如果没有需要q的，直接提交。尽管这个逻辑会很复杂？
         busy[empty_one] <= 1;
-        op[empty_one]   <= rob_op_i;
-        ic[empty_one]   <= rob_ic_i;
-        vj[empty_one]   <= rob_vj_i;
-        vk[empty_one]   <= rob_vk_i;
-        imm[empty_one]  <= rob_imm_i;
-        qj[empty_one]   <= rob_qj_i;
-        qk[empty_one]   <= rob_qk_i;
-        qd[empty_one]   <= rob_qd_i;
-        pc[empty_one]   <= rob_pc_i;
+        op[empty_one]   <= rf_op_i;
+        ic[empty_one]   <= rf_ic_i;
+        vj[empty_one]   <= rf_vj_i;
+        vk[empty_one]   <= rf_vk_i;
+        imm[empty_one]  <= rf_imm_i;
+        qj[empty_one]   <= rf_qj_i;
+        qk[empty_one]   <= rf_qk_i;
+        qd[empty_one]   <= rf_qd_i;
+        pc[empty_one]   <= rf_pc_i;
+        // bugfix: 传入值也应当被监视
+        if (lsb_en_i) begin
+          if (rf_qj_i == lsb_q_i) begin
+            qj[empty_one] <= 0;
+            vj[empty_one] <= lsb_v_i;
+          end
+          if (rf_qk_i == lsb_q_i) begin
+            qk[empty_one] <= 0;
+            vk[empty_one] <= lsb_v_i;
+          end
+        end
+        if (cdb_en_i) begin
+          if (rf_qj_i == cdb_q_i) begin
+            qj[empty_one] <= 0;
+            vj[empty_one] <= cdb_v_i;
+          end
+          if (rf_qk_i == cdb_q_i) begin
+            qk[empty_one] <= 0;
+            vk[empty_one] <= cdb_v_i;
+          end
+        end
       end
 
       // updators
+      // bugfix: 同时传入的数应当被修改
       if (lsb_en_i) begin
         for (i = 0; i < `RS_S; i = i + 1) begin
           if (qj[i] == lsb_q_i) begin

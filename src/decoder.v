@@ -14,7 +14,7 @@ module decoder (
     input if_en_i,
     input if_ic_i,  // 0 I 1 C
     input [`DAT_W-1:0] if_ins_i,
-    input [`RAM_ADR_W-1:0] if_pc_i,
+    input [`DAT_W-1:0] if_pc_i,
     input if_pbr_i,  // predicted branch or not
 
     // to RF, go fetch data for rob
@@ -26,7 +26,7 @@ module decoder (
     output [`REG_BIT-1:0] rf_rs1_o,
     output [`REG_BIT-1:0] rf_rs2_o,
     output [`DAT_W-1:0] rf_imm_o,
-    output [`RAM_ADR_W-1:0] rf_pc_o,
+    output [`DAT_W-1:0] rf_pc_o,
 
     // to ROB, launch new item
     output rob_en_o,
@@ -34,19 +34,20 @@ module decoder (
     output [`OP_W-1:0] rob_op_o,
     output [1:0] rob_tp_o,
     output [`REG_BIT-1:0] rob_rd_o,
-    output [`RAM_ADR_W-1:0] rob_pc_o,
+    output [`DAT_W-1:0] rob_pc_o,
     output rob_pbr_o  // predicted branch or not
 );
 
   reg [`DAT_W-1:0] ins;
   reg [`OP_W-1:0] op;  // 都按仓库排列顺序确定
-  reg [1:0] tp;  // 0 branch 1 load 2 store 3 alu-operations
+  reg [1:0] tp;  // 0 branch 1 store 2 load 3 alu-operations
   reg [`DAT_W-1:0] imm;
   reg [`REG_BIT-1:0] rd, rs1, rs2;
   reg pbr;  // 由于jalr这种煞笔存在，需要特别安排
 
   assign rf_op_o   = op;
   assign rf_ic_o   = if_ic_i;
+  assign rf_tp_o   = tp;
   assign rf_rd_o   = rd;
   assign rf_rs1_o  = rs1;
   assign rf_rs2_o  = rs2;
@@ -87,7 +88,7 @@ module decoder (
   assign crda = {2'b00, ins[9:7]} + 8;
   assign crs1a = {2'b00, ins[9:7]} + 8;
   assign crs2a = {2'b00, ins[4:2]} + 8;
-  assign c01oph = ins[11:0];
+  assign c01oph = ins[11:10];
   assign c01opl = ins[6:5];
 
   // TODO 先写成组合逻辑试一试，改起来不费力
@@ -179,11 +180,12 @@ module decoder (
               op  = `JAL;
             end
             3'b110, 3'b111: begin  // c.beqz, c.bnez
+              tp  = 2'b00;
               rd  = 0;
               rs1 = crs1a;
               rs2 = 0;
               imm = {{24{ins[12]}}, ins[6:5], ins[2], ins[11:10], ins[4:3], 1'b0};
-              op  = (copcode == 3'b110) ? `BEQ : `BNE;
+              op  = (cfunct3 == 3'b110) ? `BEQ : `BNE;
             end
             default: ;
           endcase
@@ -194,11 +196,11 @@ module decoder (
               rd  = crs2a;
               rs1 = 2;
               rs2 = 0;
-              imm = {20'b0, ins[10:7], ins[12:11], ins[5], ins[6], 4'b0};
+              imm = {22'b0, ins[10:7], ins[12:11], ins[5], ins[6], 2'b0};
               op  = `ADDI;
             end
             3'b010: begin  // c.lw
-              tp  = 2'b01;
+              tp  = 2'b10;
               rd  = crs2a;
               rs1 = crs1a;
               rs2 = 0;
@@ -206,7 +208,7 @@ module decoder (
               op  = `LW;
             end
             3'b110: begin  // c.sw
-              tp  = 2'b10;
+              tp  = 2'b01;
               rd  = 0;
               rs1 = crs1a;
               rs2 = crs2a;
@@ -261,7 +263,7 @@ module decoder (
               end
             end
             3'b010: begin  // c.lwsp
-              tp  = 2'b01;
+              tp  = 2'b10;
               rd  = crd;
               rs1 = 2;
               rs2 = 0;
@@ -269,7 +271,7 @@ module decoder (
               op  = `LW;
             end
             3'b110: begin  // c.swsp
-              tp  = 2'b10;
+              tp  = 2'b01;
               rd  = 0;
               rs1 = 2;
               rs2 = crs2;
@@ -335,7 +337,7 @@ module decoder (
           endcase
         end
         7'b0000011: begin
-          tp = 2'b01;
+          tp = 2'b10;
           case (ifunct3)
             3'b000:  op = `LB;  // LB
             3'b001:  op = `LH;  // LH
@@ -346,7 +348,7 @@ module decoder (
           endcase
         end
         7'b0100011: begin
-          tp = 2'b10;
+          tp = 2'b01;
           case (ifunct3)
             3'b000:  op = `SB;  // SB
             3'b001:  op = `SH;  // SH
@@ -368,7 +370,7 @@ module decoder (
         end
         7'b0110011: begin
           case (ifunct3)
-            3'b000: op = ifunct7 ? `ADD : `SUB;  // ADD or SUB
+            3'b000: op = ifunct7 ? `SUB : `ADD;  // ADD or SUB
             3'b001: op = `SLL;  // SLL
             3'b010: op = `SLT;  // SLT
             3'b011: op = `SLTU;  // SLTU

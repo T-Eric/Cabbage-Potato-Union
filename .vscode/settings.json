@@ -1,0 +1,8 @@
+{
+  "digital-ide.function.lsp.linter.vlog.diagnostor": "default",
+  "files.associations": {
+    "log": "plaintext",
+    "*.v": "verilog",
+    "io.h": "c"
+  }
+}

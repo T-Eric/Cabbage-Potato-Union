@@ -46,130 +46,119 @@ module cpu (
 
   // wires, from_to_which
 
-  wire                    cdb_en;
-  wire [    `ROB_BIT-1:0] cdb_q;
-  wire [      `DAT_W-1:0] cdb_v;
-  wire                    cdb_cbr;
-  wire [  `RAM_ADR_W-1:0] cdb_cbt;
+  wire                  cdb_en;
+  wire [  `ROB_BIT-1:0] cdb_q;
+  wire [    `DAT_W-1:0] cdb_v;
+  wire                  cdb_cbr;
+  wire [    `DAT_W-1:0] cdb_cbt;
 
-  wire                    bp_if_br;
+  wire                  bp_if_br;
 
-  wire                    dc_lsb_en;
-  wire [      `DAT_W-1:0] dc_lsb_dat;
-  wire                    dc_mc_en;
-  wire                    dc_mc_rwen;
-  wire [             2:0] dc_mc_len;
-  wire [  `RAM_ADR_W-1:0] dc_mc_adr;
-  wire [      `DAT_W-1:0] dc_mc_dat;
+  wire                  is_rf_en;
+  wire                  is_rf_ic;
+  wire [           1:0] is_rf_tp;
+  wire [     `OP_W-1:0] is_rf_op;
+  wire [  `REG_BIT-1:0] is_rf_rd;
+  wire [  `REG_BIT-1:0] is_rf_rs1;
+  wire [  `REG_BIT-1:0] is_rf_rs2;
+  wire [    `DAT_W-1:0] is_rf_imm;
+  wire [    `DAT_W-1:0] is_rf_pc;
+  wire                  is_rob_en;
+  wire                  is_rob_ic;
+  wire [     `OP_W-1:0] is_rob_op;
+  wire [           1:0] is_rob_tp;
+  wire [  `REG_BIT-1:0] is_rob_rd;
+  wire [    `DAT_W-1:0] is_rob_pc;
+  wire                  is_rob_pbr;
 
-  wire                    is_rf_en;
-  wire                    is_rf_ic;
-  wire [             1:0] is_rf_tp;
-  wire [       `OP_W-1:0] is_rf_op;
-  wire [    `REG_BIT-1:0] is_rf_rd;
-  wire [    `REG_BIT-1:0] is_rf_rs1;
-  wire [    `REG_BIT-1:0] is_rf_rs2;
-  wire [      `DAT_W-1:0] is_rf_imm;
-  wire [  `RAM_ADR_W-1:0] is_rf_pc;
-  wire                    is_rob_en;
-  wire                    is_rob_ic;
-  wire [       `OP_W-1:0] is_rob_op;
-  wire [             1:0] is_rob_tp;
-  wire [    `REG_BIT-1:0] is_rob_rd;
-  wire [  `RAM_ADR_W-1:0] is_rob_pc;
-  wire                    is_rob_pbr;
+  wire                  ic_if_en;
+  wire [    `DAT_W-1:0] ic_if_ins;
+  wire                  ic_mc_en;
+  wire [    `DAT_W-1:0] ic_mc_pc;
 
-  wire                    ic_if_en;
-  wire [      `DAT_W-1:0] ic_if_ins;
-  wire                    ic_mc_en;
-  wire [  `RAM_ADR_W-1:0] ic_mc_pc;
+  wire                  if_ic_en;
+  wire [    `DAT_W-1:0] if_ic_pc;
+  wire [    `DAT_W-1:0] if_bp_pc;
+  wire                  if_bp_en;
+  wire                  if_bp_abr;
+  wire [    `DAT_W-1:0] if_bp_tpc;
+  wire                  if_is_en;
+  wire                  if_is_ic;
+  wire [    `DAT_W-1:0] if_is_ins;
+  wire [    `DAT_W-1:0] if_is_pc;
+  wire                  if_is_pbr;
 
-  wire                    if_ic_en;
-  wire [  `RAM_ADR_W-1:0] if_ic_pc;
-  wire [  `RAM_ADR_W-1:0] if_bp_pc;
-  wire                    if_bp_en;
-  wire                    if_bp_abr;
-  wire [  `RAM_ADR_W-1:0] if_bp_tpc;
-  wire                    if_is_en;
-  wire                    if_is_ic;
-  wire [      `DAT_W-1:0] if_is_ins;
-  wire [  `RAM_ADR_W-1:0] if_is_pc;
-  wire                    if_is_pbr;
+  wire                  lsb_mc_en;
+  wire                  lsb_mc_rwen;
+  wire [     `OP_W-1:0] lsb_mc_op;
+  wire [           2:0] lsb_mc_len;
+  wire [  `DAT_W - 1:0] lsb_mc_adr;
+  wire [  `DAT_W - 1:0] lsb_mc_dat;
+  wire                  ldb_en;
+  wire [`ROB_BIT - 1:0] ldb_q;
+  wire [  `DAT_W - 1:0] ldb_v;
+  wire                  lsb_full;
 
-  wire                    lsb_dc_en;
-  wire                    lsb_dc_rwen;
-  wire [             2:0] lsb_dc_len;
-  wire [`RAM_ADR_W - 1:0] lsb_dc_adr;
-  wire [    `DAT_W - 1:0] lsb_dc_dat;
-  wire                    lsb_rs_en;
-  wire [  `ROB_BIT - 1:0] lsb_rs_q;
-  wire [    `DAT_W - 1:0] lsb_rs_v;
-  wire                    lsb_rob_en;
-  wire [  `ROB_BIT - 1:0] lsb_rob_q;
-  wire [    `DAT_W - 1:0] lsb_rob_v;
-  wire                    lsb_full;
+  wire                  mc_ic_en;
+  wire [    `DAT_W-1:0] mc_ic_ins;
+  wire                  mc_lsb_en;
+  wire [    `DAT_W-1:0] mc_lsb_dat;
+  wire [           7:0] mc_ram_dat;
+  wire [    `DAT_W-1:0] mc_ram_adr;
+  wire                  mc_ram_rwen;
 
-  wire                    mc_ic_en;
-  wire [      `DAT_W-1:0] mc_ic_ins;
-  wire                    mc_dc_en;
-  wire [      `DAT_W-1:0] mc_dc_dat;
-  wire [             7:0] mc_ram_dat;
-  wire [  `RAM_ADR_W-1:0] mc_ram_adr;
-  wire                    mc_ram_rwen;
+  wire [           7:0] ram_d;
 
-  wire [             7:0] ram_d;
+  wire                  rf_rs_en;
+  wire                  rf_rs_ic;
+  wire [  `ROB_BIT-1:0] rf_rs_qj;
+  wire [  `ROB_BIT-1:0] rf_rs_qk;
+  wire [    `DAT_W-1:0] rf_rs_vj;
+  wire [    `DAT_W-1:0] rf_rs_vk;
+  wire [  `ROB_BIT-1:0] rf_rs_qd;
+  wire [    `DAT_W-1:0] rf_rs_pc;
+  wire [     `OP_W-1:0] rf_rs_op;
+  wire [    `DAT_W-1:0] rf_rs_imm;
 
-  wire                    rf_rob_en;
-  wire                    rf_rob_ic;
-  wire                    rf_rob_ls;
-  wire [    `ROB_BIT-1:0] rf_rob_qj;
-  wire [    `ROB_BIT-1:0] rf_rob_qk;
-  wire [      `DAT_W-1:0] rf_rob_vj;
-  wire [      `DAT_W-1:0] rf_rob_vk;
-  wire [    `ROB_BIT-1:0] rf_rob_qd;
-  wire [  `RAM_ADR_W-1:0] rf_rob_pc;
-  wire [       `OP_W-1:0] rf_rob_op;
-  wire [      `DAT_W-1:0] rf_rob_imm;
+  wire                  rf_lsb_en;
+  wire [  `ROB_BIT-1:0] rf_lsb_qj;
+  wire [  `ROB_BIT-1:0] rf_lsb_qk;
+  wire [    `DAT_W-1:0] rf_lsb_vj;
+  wire [    `DAT_W-1:0] rf_lsb_vk;
+  wire [  `ROB_BIT-1:0] rf_lsb_qd;
+  wire [     `OP_W-1:0] rf_lsb_op;
+  wire [    `DAT_W-1:0] rf_lsb_imm;
 
-  wire [    `ROB_BIT-1:0] rob_rf_qd;
-  wire                    rob_rs_en;
-  wire                    rob_rs_ic;
-  wire [     `OP_W - 1:0] rob_rs_op;
-  wire [    `DAT_W - 1:0] rob_rs_imm;
-  wire [  `ROB_BIT - 1:0] rob_rs_qj;
-  wire [  `ROB_BIT - 1:0] rob_rs_qk;
-  wire [    `DAT_W - 1:0] rob_rs_vj;
-  wire [    `DAT_W - 1:0] rob_rs_vk;
-  wire [  `ROB_BIT - 1:0] rob_rs_qd;
-  wire [  `RAM_ADR_W-1:0] rob_rs_pc;
-  wire                    rob_lsb_en;
-  wire [       `OP_W-1:0] rob_lsb_op;
-  wire [    `DAT_W - 1:0] rob_lsb_imm;
-  wire [  `ROB_BIT - 1:0] rob_lsb_qj;
-  wire [  `ROB_BIT - 1:0] rob_lsb_qk;
-  wire [    `DAT_W - 1:0] rob_lsb_vj;
-  wire [    `DAT_W - 1:0] rob_lsb_vk;
-  wire [  `ROB_BIT - 1:0] rob_lsb_qd;
-  wire                    rob_lsb_cmt;
-  wire                    rob_rf_en;
-  wire [  `REG_BIT - 1:0] rob_rf_rd;
-  wire [  `ROB_BIT - 1:0] rob_rf_q;
-  wire [    `DAT_W - 1:0] rob_rf_v;
-  wire                    rob_full;
+  wire [  `ROB_BIT-1:0] rf_rob_reqqj;
+  wire [  `ROB_BIT-1:0] rf_rob_reqqk;
+  wire                  rob_rf_rdyj;
+  wire                  rob_rf_rdyk;
+  wire [  `DAT_W - 1:0] rob_rf_rdyvj;
+  wire [  `DAT_W - 1:0] rob_rf_rdyvk;
 
-  wire                    br_flag;
-  wire                    br_abr;
-  wire [  `RAM_ADR_W-1:0] br_tpc;
-  wire [`RAM_ADR_W - 1:0] br_cbt;
+  wire [  `ROB_BIT-1:0] rob_rf_qd;
+  wire                  rob_rs_en;
+  wire                  rob_rs_ic;
+  wire                  rob_lsb_cmt;
+  wire                  rob_rf_en;
+  wire [`REG_BIT - 1:0] rob_rf_rd;
+  wire [`ROB_BIT - 1:0] rob_rf_q;
+  wire [  `DAT_W - 1:0] rob_rf_v;
+  wire                  rob_full;
 
-  wire                    rs_alu_en;
-  wire [       `OP_W-1:0] rs_alu_op;
-  wire                    rs_alu_ic;
-  wire [    `ROB_BIT-1:0] rs_alu_qd;
-  wire [      `DAT_W-1:0] rs_alu_vs;
-  wire [      `DAT_W-1:0] rs_alu_vt;
-  wire [      `DAT_W-1:0] rs_alu_imm;
-  wire [  `RAM_ADR_W-1:0] rs_alu_pc;
+  wire                  br_flag;
+  wire                  br_abr;
+  wire [    `DAT_W-1:0] br_tpc;
+  wire [  `DAT_W - 1:0] br_cbt;
+
+  wire                  rs_alu_en;
+  wire [     `OP_W-1:0] rs_alu_op;
+  wire                  rs_alu_ic;
+  wire [  `ROB_BIT-1:0] rs_alu_qd;
+  wire [    `DAT_W-1:0] rs_alu_vs;
+  wire [    `DAT_W-1:0] rs_alu_vt;
+  wire [    `DAT_W-1:0] rs_alu_imm;
+  wire [    `DAT_W-1:0] rs_alu_pc;
 
 
   // units
@@ -211,30 +200,6 @@ module cpu (
 
   );
 
-  data_cache DC (
-      .clk(clk_in),
-      .rst(rst_in),
-      .en (rdy_in),
-
-      .lsb_en_i  (lsb_dc_en),
-      .lsb_rwen_i(lsb_dc_rwen),
-      .lsb_len_i (lsb_dc_len),
-      .lsb_adr_i (lsb_dc_adr),
-      .lsb_dat_i (lsb_dc_dat),
-      .lsb_en_o  (dc_lsb_en),
-      .lsb_dat_o (dc_lsb_dat),
-
-      .mc_en_i  (mc_dc_en),
-      .mc_dat_i (mc_dc_dat),
-      .mc_en_o  (dc_mc_en),
-      .mc_rwen_o(dc_mc_rwen),
-      .mc_len_o (dc_mc_len),
-      .mc_adr_o (dc_mc_adr),
-      .mc_dat_o (dc_mc_dat),
-
-      .br_flag(br_flag)
-  );
-
   decoder DEC (
       .clk(clk_in),
       .rst(rst_in),
@@ -261,6 +226,7 @@ module cpu (
       .rob_tp_o (is_rob_tp),
       .rob_rd_o (is_rob_rd),
       .rob_pc_o (is_rob_pc),
+      .rob_op_o (is_rob_op),
       .rob_pbr_o(is_rob_pbr)
   );
 
@@ -278,8 +244,9 @@ module cpu (
       .mc_en_i (mc_ic_en),
       .mc_ins_i(mc_ic_ins),
       .mc_en_o (ic_mc_en),
-      .mc_pc_o (ic_mc_pc)
+      .mc_pc_o (ic_mc_pc),
 
+      .br_flag(br_flag)
   );
 
   ins_fetch IF (
@@ -317,32 +284,29 @@ module cpu (
       .rst(rst_in),
       .en (rdy_in),
 
-      .rob_en_i (rob_lsb_en),
-      .rob_op_i (rob_lsb_op),
-      .rob_qj_i (rob_lsb_qj),
-      .rob_qk_i (rob_lsb_qk),
-      .rob_vj_i (rob_lsb_vj),
-      .rob_vk_i (rob_lsb_vk),
-      .rob_qd_i (rob_lsb_qd),
-      .rob_imm_i(rob_lsb_imm),
+      .rf_en_i (rf_lsb_en),
+      .rf_op_i (rf_lsb_op),
+      .rf_qj_i (rf_lsb_qj),
+      .rf_qk_i (rf_lsb_qk),
+      .rf_vj_i (rf_lsb_vj),
+      .rf_vk_i (rf_lsb_vk),
+      .rf_qd_i (rf_lsb_qd),
+      .rf_imm_i(rf_lsb_imm),
 
       // Visit Memory
-      .dc_en_o  (lsb_dc_en),
-      .dc_rwen_o(lsb_dc_rwen),
-      .dc_len_o (lsb_dc_len),
-      .dc_adr_o (lsb_dc_adr),
-      .dc_dat_o (lsb_dc_dat),
-      .dc_en_i  (dc_lsb_en),
-      .dc_dat_i (dc_lsb_dat),
+      .dc_en_o  (lsb_mc_en),
+      .dc_rwen_o(lsb_mc_rwen),
+      .dc_op_o  (lsb_mc_op),
+      .dc_len_o (lsb_mc_len),
+      .dc_adr_o (lsb_mc_adr),
+      .dc_dat_o (lsb_mc_dat),
+      .dc_en_i  (mc_lsb_en),
+      .dc_dat_i (mc_lsb_dat),
 
       // Output LOAD Result
-      .rs_en_o(lsb_rs_en),
-      .rs_q_o (lsb_rs_q),
-      .rs_v_o (lsb_rs_v),
-
-      .rob_en_o(lsb_rob_en),
-      .rob_q_o (lsb_rob_q),
-      .rob_v_o (lsb_rob_v),
+      .ldb_en_o(ldb_en),
+      .ldb_q_o (ldb_q),
+      .ldb_v_o (ldb_v),
 
       .cdb_en_i(cdb_en),
       .cdb_q_i (cdb_q),
@@ -350,7 +314,7 @@ module cpu (
 
       .rob_cmt_i(rob_lsb_cmt),
 
-      .br_flag_i(br_flag),
+      .br_flag(br_flag),
 
       .full(lsb_full),
 
@@ -367,21 +331,21 @@ module cpu (
       .ic_en_o (mc_ic_en),
       .ic_ins_o(mc_ic_ins),
 
-      .dc_en_i  (dc_mc_en),
-      .dc_rwen_i(dc_mc_rwen),
-      .dc_len_i (dc_mc_len),
-      .dc_adr_i (dc_mc_adr),
-      .dc_dat_i (dc_mc_dat),
-      .dc_en_o  (mc_dc_en),
-      .dc_dat_o (mc_dc_dat),
+      .dc_en_i  (lsb_mc_en),
+      .dc_rwen_i(lsb_mc_rwen),
+      .dc_op_i  (lsb_mc_op),
+      .dc_len_i (lsb_mc_len),
+      .dc_adr_i (lsb_mc_adr),
+      .dc_dat_i (lsb_mc_dat),
+      .dc_en_o  (mc_lsb_en),
+      .dc_dat_o (mc_lsb_dat),
 
       .ram_dat_i (mem_din),
       .ram_dat_o (mem_dout),
-      .ram_adr_o (mem_a[16:0]),
+      .ram_adr_o (mem_a),
       .ram_rwen_o(mem_wr),
 
       .br_flag(br_flag)
-
   );
 
   register_file RF (
@@ -399,22 +363,48 @@ module cpu (
       .is_imm_i(is_rf_imm),
       .is_pc_i (is_rf_pc),
 
-      .rob_en_i (rob_rf_en),
-      .rob_rd_i (rob_rf_rd),
-      .rob_q_i  (rob_rf_q),
-      .rob_v_i  (rob_rf_v),
-      .rob_qd_i (rob_rf_qd),
-      .rob_en_o (rf_rob_en),
-      .rob_ic_o (rf_rob_ic),
-      .rob_ls_o (rf_rob_ls),
-      .rob_qj_o (rf_rob_qj),
-      .rob_qk_o (rf_rob_qk),
-      .rob_vj_o (rf_rob_vj),
-      .rob_vk_o (rf_rob_vk),
-      .rob_qd_o (rf_rob_qd),
-      .rob_pc_o (rf_rob_pc),
-      .rob_op_o (rf_rob_op),
-      .rob_imm_o(rf_rob_imm)
+      .rob_en_i(rob_rf_en),
+      .rob_rd_i(rob_rf_rd),
+      .rob_q_i (rob_rf_q),
+      .rob_v_i (rob_rf_v),
+      .rob_qd_i(rob_rf_qd),
+
+      .rob_reqqj_o(rf_rob_reqqj),
+      .rob_reqqk_o(rf_rob_reqqk),
+      .rob_rdyj_i(rob_rf_rdyj),
+      .rob_rdyk_i(rob_rf_rdyk),
+      .rob_rdyvj_i(rob_rf_rdyvj),
+      .rob_rdyvk_i(rob_rf_rdyvk),
+
+      .rs_en_o (rf_rs_en),
+      .rs_ic_o (rf_rs_ic),
+      .rs_qj_o (rf_rs_qj),
+      .rs_qk_o (rf_rs_qk),
+      .rs_vj_o (rf_rs_vj),
+      .rs_vk_o (rf_rs_vk),
+      .rs_qd_o (rf_rs_qd),
+      .rs_pc_o (rf_rs_pc),
+      .rs_op_o (rf_rs_op),
+      .rs_imm_o(rf_rs_imm),
+
+      .lsb_en_o (rf_lsb_en),
+      .lsb_qj_o (rf_lsb_qj),
+      .lsb_qk_o (rf_lsb_qk),
+      .lsb_vj_o (rf_lsb_vj),
+      .lsb_vk_o (rf_lsb_vk),
+      .lsb_qd_o (rf_lsb_qd),
+      .lsb_op_o (rf_lsb_op),
+      .lsb_imm_o(rf_lsb_imm),
+
+      .cdb_en_i(cdb_en),
+      .cdb_q_i (cdb_q),
+      .cdb_v_i (cdb_v),
+
+      .ldb_en_i(ldb_en),
+      .ldb_q_i (ldb_q),
+      .ldb_v_i (ldb_v),
+
+      .br_flag(br_flag)
   );
 
   reorder_buffer ROB (
@@ -430,42 +420,10 @@ module cpu (
       .is_pc_i (is_rob_pc),
       .is_pbr_i(is_rob_pbr),
 
-      .rf_en_i (rf_rob_en),
-      .rf_ls_i (rf_rob_ls),
-      .rf_qj_i (rf_rob_qj),
-      .rf_qk_i (rf_rob_qk),
-      .rf_vj_i (rf_rob_vj),
-      .rf_vk_i (rf_rob_vk),
-      .rf_qd_i (rf_rob_qd),
-      .rf_op_i (rf_rob_op),
-      .rf_imm_i(rf_rob_imm),
-      .rf_pc_i (rf_rob_pc),
-      .rf_qd_o (rf_rob_qd),
-
-      .rs_en_o (rob_rs_en),
-      .rs_ic_o (rob_rs_ic),
-      .rs_op_o (rob_rs_op),
-      .rs_imm_o(rob_rs_imm),
-      .rs_qj_o (rob_rs_qj),
-      .rs_qk_o (rob_rs_qk),
-      .rs_vj_o (rob_rs_vj),
-      .rs_vk_o (rob_rs_vk),
-      .rs_qd_o (rob_rs_qd),
-      .rs_pc_o (rob_rs_pc),
-
-      .lsb_en_o (rob_lsb_en),
-      .lsb_op_o (rob_lsb_op),
-      .lsb_imm_o(rob_lsb_imm),
-      .lsb_qj_o (rob_lsb_qj),
-      .lsb_qk_o (rob_lsb_qk),
-      .lsb_vj_o (rob_lsb_vj),
-      .lsb_vk_o (rob_lsb_vk),
-      .lsb_qd_o (rob_lsb_qd),
-
       .lsb_cmt_o(rob_lsb_cmt),
-      .lsb_en_i (lsb_rob_en),
-      .lsb_q_i  (lsb_rob_q),
-      .lsb_v_i  (lsb_rob_v),
+      .lsb_en_i (ldb_en),
+      .lsb_q_i  (ldb_q),
+      .lsb_v_i  (ldb_v),
 
       .cdb_en_i (cdb_en),
       .cdb_q_i  (cdb_q),
@@ -477,11 +435,19 @@ module cpu (
       .rf_rd_o(rob_rf_rd),
       .rf_q_o (rob_rf_q),
       .rf_v_o (rob_rf_v),
+      .rf_qd_o(rob_rf_qd),
+
+      .rf_reqqj_i(rf_rob_reqqj),
+      .rf_reqqk_i(rf_rob_reqqk),
+      .rf_rdyj_o(rob_rf_rdyj),
+      .rf_rdyk_o(rob_rf_rdyk),
+      .rf_rdyvj_o(rob_rf_rdyvj),
+      .rf_rdyvk_o(rob_rf_rdyvk),
 
       .br_flag(br_flag),
       .br_abr (br_abr),
       .br_tpc (br_tpc),
-      .br_bt  (br_cbt),
+      .br_cbt (br_cbt),
 
       .full(rob_full)
   );
@@ -491,20 +457,20 @@ module cpu (
       .rst(rst_in),
       .en (rdy_in),
 
-      .rob_en_i (rob_rs_en),
-      .rob_op_i (rob_rs_op),
-      .rob_ic_i (rob_rs_ic),
-      .rob_qj_i (rob_rs_qj),
-      .rob_qk_i (rob_rs_qk),
-      .rob_vj_i (rob_rs_vj),
-      .rob_vk_i (rob_rs_vk),
-      .rob_qd_i (rob_rs_qd),
-      .rob_imm_i(rob_rs_imm),
-      .rob_pc_i (rob_rs_pc),
+      .rf_en_i (rf_rs_en),
+      .rf_op_i (rf_rs_op),
+      .rf_ic_i (rf_rs_ic),
+      .rf_qj_i (rf_rs_qj),
+      .rf_qk_i (rf_rs_qk),
+      .rf_vj_i (rf_rs_vj),
+      .rf_vk_i (rf_rs_vk),
+      .rf_qd_i (rf_rs_qd),
+      .rf_imm_i(rf_rs_imm),
+      .rf_pc_i (rf_rs_pc),
 
-      .lsb_en_i(lsb_rs_en),
-      .lsb_q_i (lsb_rs_q),
-      .lsb_v_i (lsb_rs_v),
+      .lsb_en_i(ldb_en),
+      .lsb_q_i (ldb_q),
+      .lsb_v_i (ldb_v),
       .cdb_en_i(cdb_en),
       .cdb_q_i (cdb_q),
       .cdb_v_i (cdb_v),
@@ -521,16 +487,20 @@ module cpu (
       .br_flag(br_flag)
   );
 
-  //   always @(posedge clk_in) begin
-  //     if (rst_in) begin
+  // indicator
 
-  //     end else
-  //     if (!rdy_in) begin
+  reg [31:0] counter;
 
-  //     end else begin
+  initial begin
+    counter = 0;
+  end
 
-  //     end
-  //   end
+  always @(posedge clk_in) begin
+    counter <= counter + 1;
+    if (counter % 50 == 0) begin
+      $display("---Time: %dns---", counter * 2);
+    end
+  end
 
 endmodule
 
