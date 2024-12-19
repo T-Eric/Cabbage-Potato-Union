@@ -29,8 +29,10 @@ module testbench;
   end
 
   initial begin
-    // $dumpfile("test.vcd");
+`ifndef ONLINE_JUDGE
+    $dumpfile("test.vcd");
     $dumpvars(0, testbench);
+`endif
     #300000000 $finish;
   end
 
