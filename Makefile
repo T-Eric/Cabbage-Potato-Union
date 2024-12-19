@@ -56,6 +56,8 @@ build_fpga_test: testcases _no_testcase_name_check $(TESTSPACE_DIR)
 
 run_sim: build_sim build_sim_test
 	cd $(TESTSPACE_DIR) && ./test > $(TESTSPACE_DIR)/test.dbg
+# cd $(TESTSPACE_DIR) && ./test > $(TESTSPACE_DIR)/test.dbg
+
 # add your own test script here
 # Example:
 #	diff ./test/test.ans ./test/test.out
