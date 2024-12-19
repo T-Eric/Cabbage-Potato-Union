@@ -43,7 +43,7 @@ module ins_fetch (
   // 1. PC没必要单独一个元件，应当直接装进IF中
   // 2. JAL虽然跳转，但是可以直接跳，没必要拉到后面去，等效赋值语句；JALR虽然无条件，但是必须要算，则归为Branch指令
   reg [`DAT_W-1:0] pc;
-  reg ic_wait;  // waiting for ic's ins
+  // reg ic_wait;  // waiting for ic's ins
 
   wire ins_ic;  // i 0 c 1, depend on ic_ins_i[1:0]
   wire [`DAT_W-1:0] ijal_dst, cjal_dst, ibr_dst, cbr_dst;  // direct calculation
@@ -75,27 +75,26 @@ module ins_fetch (
   always @(posedge clk) begin
     if (rst) begin
       pc <= 0;
-      ic_wait <= 0;
+      // ic_wait <= 0;
       ic_en_o <= 0;
       is_en_o <= 0;
     end else if (en && br_flag_i) begin
       // branch: 修改预测结果，执行跳转
       pc <= br_cbt_i;
-      ic_wait <= 0;
+      // ic_wait <= 0;
       ic_en_o <= 0;
       is_en_o <= 0;
     end else if (en) begin
       // 喊出，并等待
       ic_en_o <= 0;
       is_en_o <= 0;
-      if (!full_i && !ic_wait) begin
-        ic_wait <= 1;
-        ic_en_o <= 1;
-      end
 
-      if (ic_en_i && ic_wait) begin
-        ic_wait  <= 0;
+      // 适配组合逻辑icache做出的修改：ic_wait好像没用
+      // 如果当前pc无法对应hit，即ic_en_i=0，则进入等待
+      // 否则该pc可以直接送出
+      if (!full_i && !ic_en_i) ic_en_o <= 1;
 
+      if (!full_i && ic_en_i) begin
         is_en_o  <= 1;
         is_pc_o  <= pc;
         is_ins_o <= ic_ins_i;
@@ -105,7 +104,7 @@ module ins_fetch (
         if (ins_ic) begin
           // RV23C
           case (copcode)
-            5'b10101,5'b00101: begin  // c.jal & c.j, 
+            5'b10101, 5'b00101: begin  // c.jal & c.j, 
               pc <= cjal_dst;
             end
             5'b11001, 5'b11101: begin  // branches, c.beqz&c.bnez

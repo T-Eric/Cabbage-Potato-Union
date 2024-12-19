@@ -31,7 +31,7 @@ module testbench;
   initial begin
     $dumpfile("test.vcd");
     $dumpvars(0, testbench);
-    #1000000 $finish;  // 300000000
+    #50000000 $finish;  // 300000000
   end
 
 endmodule

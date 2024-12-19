@@ -22,7 +22,8 @@ module reorder_buffer (
     input is_pbr_i,  // predicted jump-to 
 
     // from/to LSB: commit and update
-    output reg                  lsb_cmt_o,  // tell LSB to store now
+    output reg                  lsb_cmt_o,       // tell LSB to store now
+    input                       lsb_cmt_full_i,
     input                       lsb_en_i,
     input      [`ROB_BIT - 1:0] lsb_q_i,
     input      [  `DAT_W - 1:0] lsb_v_i,
@@ -56,7 +57,7 @@ module reorder_buffer (
     output reg [`DAT_W - 1:0] br_cbt,   // branched to where
 
     // Full
-    output reg full
+    output full
 );
   integer i;
 
@@ -74,12 +75,15 @@ module reorder_buffer (
 
   // queue
   reg [`ROB_BIT-1:0] chead, ctail;  // [) pointer
-  wire [`ROB_BIT-1:0] thead, ttail;
+  wire [`ROB_BIT-1:0] thead, ttail, tttail, ttttail;
   wire empty;
 
   assign thead = (chead + 5'b1 == 5'b0) ? 5'b1 : (chead + 5'b1);
   assign ttail = (ctail + 5'b1 == 5'b0) ? 5'b1 : (ctail + 5'b1);
-  assign empty = !full && chead == ctail;
+  assign tttail = (ctail + 2 == 5'b0) ? 5'b1 : (ctail + 2);
+  assign ttttail = (ctail + 3 == 5'b0) ? 5'b1 : (ctail + 3);
+  assign full = (ttail == chead) || (tttail == chead) || (ttttail == chead);
+  assign empty = chead == ctail;
   assign rf_qd_o = ctail;
 
   // ready supply
@@ -129,19 +133,18 @@ module reorder_buffer (
         cbt[i] <= 0;
         ready[i] <= 0;
       end
-      full <= 0;
-      chead <= 1;
-      ctail <= 1;
+      chead   <= 1;
+      ctail   <= 1;
 
       br_flag <= 0;
-      br_abr <= 0;
-      br_tpc <= 0;
-      br_cbt <= 0;
+      br_abr  <= 0;
+      br_tpc  <= 0;
+      br_cbt  <= 0;
 
       rf_en_o <= 0;
       rf_rd_o <= 0;
-      rf_q_o <= 0;
-      rf_v_o <= 0;
+      rf_q_o  <= 0;
+      rf_v_o  <= 0;
     end else if (en) begin
       // reset enables
       ready[0]  <= 0;
@@ -150,7 +153,7 @@ module reorder_buffer (
       br_flag   <= 0;
 
       // new instruction fifo input: from IS
-      if (is_en_i && !full) begin
+      if (is_en_i) begin
         ready[ctail] <= 0;
         v[ctail] <= 0;
         ic[ctail] <= is_ic_i;
@@ -162,7 +165,6 @@ module reorder_buffer (
         rd[ctail] <= is_rd_i;
 
         ctail <= ttail;
-        full <= ttail == chead;
       end
 
       // update some results: from LSB and CDB
@@ -178,67 +180,22 @@ module reorder_buffer (
         cbt[cdb_q_i] <= cdb_cbt_i;
       end
 
-      // // 从rf中得到qv数据后，分发给rs和lsb
-      // if (rf_en_i) begin
-      //   // 为了同步时序，从rf中接受是load/store与否的信号\
-      //   lsb_en_o <= rf_ls_i;
-      //   rs_en_o <= ~rf_ls_i;  // load 和 store 一定会stall，交给lsb去解决
-
-      //   op_o <= rf_op_i;
-      //   imm_o <= rf_imm_i;
-      //   pc_o <= rf_pc_i;
-      //   ic_o <= rf_ic_i;
-
-      //   // rf传来的值,记入
-      //   qj_o <= rf_qj_i;
-      //   qk_o <= rf_qk_i;
-      //   vj_o <= rf_vj_i;
-      //   vk_o <= rf_vk_i;
-      //   qd_o <= rf_qd_i;
-
-      //   if (rf_qj_i != 0) begin
-      //     if (cdb_en_i && cdb_q_i == rf_qj_i) begin
-      //       qj_o <= 0;
-      //       vj_o <= cdb_v_i;
-      //     end else if (lsb_en_i && lsb_q_i == rf_qj_i) begin
-      //       qj_o <= 0;
-      //       vj_o <= lsb_v_i;
-      //     end else if (ready[rf_qj_i]) begin
-      //       qj_o <= 0;
-      //       vj_o <= v[rf_qj_i];
-      //     end
-      //   end
-
-      //   if (rf_qk_i != 0) begin
-      //     if (cdb_en_i && cdb_q_i == rf_qk_i) begin
-      //       qk_o <= 0;
-      //       vk_o <= cdb_v_i;
-      //     end else if (lsb_en_i && lsb_q_i == rf_qk_i) begin
-      //       qk_o <= 0;
-      //       vk_o <= lsb_v_i;
-      //     end else if (ready[rf_qk_i]) begin
-      //       qk_o <= 0;
-      //       vk_o <= v[rf_qk_i];
-      //     end
-      //   end
-      // end
-
       // Try commit head: from myself's !empty
       // 00:branch, 01:store, 10:load, 11: alu operation
       if (!empty) begin
-        if (ready[chead] || tp[chead] == 2'b01) begin
-          $display("ROB Commit,pc:%h, q:%d, tp:%b, op:%d, rd:%d, val:%h\n", pc[chead], chead,
-                   tp[chead], op[chead], rd[chead], v[chead]);
+        if (ready[chead] || (!lsb_cmt_full_i && tp[chead] == 2'b01)) begin
+          // $display("ROB Commit,pc:%h, q:%d, tp:%b, op:%d, rd:%d, val:%h\n", pc[chead], chead,
+          //          tp[chead], op[chead], rd[chead], v[chead]);
           case (tp[chead])
             2'b00: begin
               if (pbr[chead] != cbr[chead]) begin
-                $display("Misprediction! From:%h, To:%h", pc[chead], cbt[chead]);
+                // $display("Misprediction! From %h, To %h", pc[chead], cbt[chead]);
                 br_flag <= 1;
                 br_tpc  <= pc[chead];
                 br_abr  <= cbr[chead];
                 br_cbt  <= cbt[chead];
               end else begin
-                $display("Jump From %h, To %h", pc[chead], cbt[chead]);
+                // $display("Jump From %h, To %h", pc[chead], cbt[chead]);
               end
               if (op[chead] == `JALR) begin
                 rf_en_o <= 1;
@@ -259,7 +216,6 @@ module reorder_buffer (
             end
           endcase
           chead <= thead;
-          if (full && !is_en_i) full <= 0;
         end
       end
     end

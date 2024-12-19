@@ -94,10 +94,12 @@ module cpu (
   wire [           2:0] lsb_mc_len;
   wire [  `DAT_W - 1:0] lsb_mc_adr;
   wire [  `DAT_W - 1:0] lsb_mc_dat;
+  wire [    `DAT_W-1:0] lsb_mc_pc;
   wire                  ldb_en;
   wire [`ROB_BIT - 1:0] ldb_q;
   wire [  `DAT_W - 1:0] ldb_v;
   wire                  lsb_full;
+  wire                  lsb_cmt_full;
 
   wire                  mc_ic_en;
   wire [    `DAT_W-1:0] mc_ic_ins;
@@ -128,6 +130,7 @@ module cpu (
   wire [  `ROB_BIT-1:0] rf_lsb_qd;
   wire [     `OP_W-1:0] rf_lsb_op;
   wire [    `DAT_W-1:0] rf_lsb_imm;
+  wire [    `DAT_W-1:0] rf_lsb_pc;
 
   wire [  `ROB_BIT-1:0] rf_rob_reqqj;
   wire [  `ROB_BIT-1:0] rf_rob_reqqk;
@@ -276,7 +279,7 @@ module cpu (
       .is_pc_o (if_is_pc),
       .is_pbr_o(if_is_pbr),
 
-      .full_i(lsb_full || rob_full)  // TODO, LSB+RS+ROB
+      .full_i(lsb_full || rob_full || lsb_cmt_full)  // TODO, LSB+RS+ROB
   );
 
   load_store_buffer LSB (
@@ -292,6 +295,7 @@ module cpu (
       .rf_vk_i (rf_lsb_vk),
       .rf_qd_i (rf_lsb_qd),
       .rf_imm_i(rf_lsb_imm),
+      .rf_pc_i (rf_lsb_pc),
 
       // Visit Memory
       .dc_en_o  (lsb_mc_en),
@@ -300,6 +304,7 @@ module cpu (
       .dc_len_o (lsb_mc_len),
       .dc_adr_o (lsb_mc_adr),
       .dc_dat_o (lsb_mc_dat),
+      .dc_pc_o  (lsb_mc_pc),
       .dc_en_i  (mc_lsb_en),
       .dc_dat_i (mc_lsb_dat),
 
@@ -313,6 +318,7 @@ module cpu (
       .cdb_v_i (cdb_v),
 
       .rob_cmt_i(rob_lsb_cmt),
+      .rob_cmt_full(lsb_cmt_full),
 
       .br_flag(br_flag),
 
@@ -337,6 +343,7 @@ module cpu (
       .dc_len_i (lsb_mc_len),
       .dc_adr_i (lsb_mc_adr),
       .dc_dat_i (lsb_mc_dat),
+      .dc_pc_i  (lsb_mc_pc),
       .dc_en_o  (mc_lsb_en),
       .dc_dat_o (mc_lsb_dat),
 
@@ -371,8 +378,8 @@ module cpu (
 
       .rob_reqqj_o(rf_rob_reqqj),
       .rob_reqqk_o(rf_rob_reqqk),
-      .rob_rdyj_i(rob_rf_rdyj),
-      .rob_rdyk_i(rob_rf_rdyk),
+      .rob_rdyj_i (rob_rf_rdyj),
+      .rob_rdyk_i (rob_rf_rdyk),
       .rob_rdyvj_i(rob_rf_rdyvj),
       .rob_rdyvk_i(rob_rf_rdyvk),
 
@@ -395,6 +402,7 @@ module cpu (
       .lsb_qd_o (rf_lsb_qd),
       .lsb_op_o (rf_lsb_op),
       .lsb_imm_o(rf_lsb_imm),
+      .lsb_pc_o (rf_lsb_pc),
 
       .cdb_en_i(cdb_en),
       .cdb_q_i (cdb_q),
@@ -421,9 +429,10 @@ module cpu (
       .is_pbr_i(is_rob_pbr),
 
       .lsb_cmt_o(rob_lsb_cmt),
-      .lsb_en_i (ldb_en),
-      .lsb_q_i  (ldb_q),
-      .lsb_v_i  (ldb_v),
+      .lsb_cmt_full_i(lsb_cmt_full),
+      .lsb_en_i(ldb_en),
+      .lsb_q_i(ldb_q),
+      .lsb_v_i(ldb_v),
 
       .cdb_en_i (cdb_en),
       .cdb_q_i  (cdb_q),
@@ -439,8 +448,8 @@ module cpu (
 
       .rf_reqqj_i(rf_rob_reqqj),
       .rf_reqqk_i(rf_rob_reqqk),
-      .rf_rdyj_o(rob_rf_rdyj),
-      .rf_rdyk_o(rob_rf_rdyk),
+      .rf_rdyj_o (rob_rf_rdyj),
+      .rf_rdyk_o (rob_rf_rdyk),
       .rf_rdyvj_o(rob_rf_rdyvj),
       .rf_rdyvk_o(rob_rf_rdyvk),
 
@@ -497,7 +506,7 @@ module cpu (
 
   always @(posedge clk_in) begin
     counter <= counter + 1;
-    if (counter % 50 == 0) begin
+    if (counter % 500 == 0) begin
       $display("---Time: %dns---", counter * 2);
     end
   end

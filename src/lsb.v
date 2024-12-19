@@ -24,6 +24,7 @@ module load_store_buffer (
     input [`DAT_W - 1:0] rf_vk_i,
     input [`ROB_BIT - 1:0] rf_qd_i,
     input [`DAT_W - 1:0] rf_imm_i,
+    input [`DAT_W-1:0] rf_pc_i,  // 仅供调试 
 
     // Visit Memory
     output reg                dc_en_o,
@@ -32,6 +33,7 @@ module load_store_buffer (
     output reg [         2:0] dc_len_o,   // 1:B; 2:H; 4:W
     output reg [`DAT_W - 1:0] dc_adr_o,
     output reg [`DAT_W - 1:0] dc_dat_o,
+    output reg [  `DAT_W-1:0] dc_pc_o,    // 仅供调试
     input                     dc_en_i,
     input      [`DAT_W - 1:0] dc_dat_i,
 
@@ -47,13 +49,14 @@ module load_store_buffer (
     input [`DAT_W - 1:0] cdb_v_i,
 
     // Commit STORE
-    input rob_cmt_i,
+    input  rob_cmt_i,
+    output rob_cmt_full,
 
     // ! Misprediction
     input br_flag,
 
     // stall when full
-    output reg full,
+    output full,
 
     // whole io buffer, if 0 should not Load/Store
     input iob_full_i
@@ -65,6 +68,7 @@ module load_store_buffer (
   reg [`ROB_BIT-1:0] qj[`LSB_S-1:0];
   reg [`ROB_BIT-1:0] qk[`LSB_S-1:0];
   reg [`ROB_BIT-1:0] qd[`LSB_S-1:0];
+  reg [`DAT_W-1:0] pc[`LSB_S-1:0];  //仅供调试
 
   wire ls[`LSB_S-1:0];  // Load 1 or Store 0
   wire ready[`LSB_S-1:0];
@@ -80,11 +84,12 @@ module load_store_buffer (
   // FIFO Load-Store
   reg [`ROB_BIT-1:0] chead, ctail;  // [) pointer
   wire [`ROB_BIT-1:0] thead, ttail;
-  wire empty;
+  wire empty, full;
 
   assign thead = chead + 1;
   assign ttail = ctail + 1;
-  assign empty = !full && chead == ctail;
+  assign full  = (ttail == chead || ttail + 1 == chead || ttail + 2 == chead);
+  assign empty = !full && chead == ctail;  // 去掉了op的判定，毕竟只要empty就不会有提交
 
   // connect DC
   reg dc_wait;  // 1 means pending for DC
@@ -92,10 +97,14 @@ module load_store_buffer (
 
   // commit counter
   reg [`LSB_BIT-1:0] cmt_cnt;
+  assign rob_cmt_full = cmt_cnt >= 28;
 
   // temporary remember
   reg [`ROB_BIT-1:0] last_q;
   reg [`DAT_W-1:0] last_v;
+
+  // whether it's ready and we can directly submit
+
 
   // ---debug---
   wire [`OP_W-1:0] DHop;
@@ -105,6 +114,7 @@ module load_store_buffer (
   wire [`ROB_BIT-1:0] DHqj;
   wire [`ROB_BIT-1:0] DHqk;
   wire [`ROB_BIT-1:0] DHqd;
+  wire [`DAT_W-1:0] DHpc;
   wire DHls;
   wire DHready;
 
@@ -116,6 +126,7 @@ module load_store_buffer (
   assign DHqd = qd[chead];
   assign DHimm = imm[chead];
   assign DHls = ls[chead];
+  assign DHpc = pc[chead];
   assign DHready = ready[chead];
   // ---debug---
 
@@ -123,9 +134,9 @@ module load_store_buffer (
   integer i;
   always @(posedge clk) begin
     if (rst) begin
-      chead <= 0;
-      ctail <= 0;
-      full <= 0;
+      chead   <= 0;
+      ctail   <= 0;
+      // full <= 0;
       cmt_cnt <= 0;
       for (i = 0; i < `LSB_S; i = i + 1) begin
         op[i]  <= 0;
@@ -135,6 +146,7 @@ module load_store_buffer (
         qj[i]  <= 0;
         qk[i]  <= 0;
         qd[i]  <= 0;
+        pc[i]  <= 0;
       end
       ldb_en_o <= 0;
       ldb_q_o  <= 0;
@@ -144,25 +156,26 @@ module load_store_buffer (
       ldb_q_o  <= 0;
       ldb_v_o  <= 0;
       ldb_en_o <= 0;
-
+      dc_en_o  <= 0;
       if (!ls[chead] || empty) begin
         // 如果是写，后面不可能有读，让这次翻篇即可
         // dc_wait <= 0;
         if (dc_wait) begin
           ctail <= thead + cmt_cnt;
           if (dc_en_i) begin
-            chead   <= thead;
+            chead <= thead;
             dc_wait <= 0;
+            op[chead] <= 0;
           end
         end else ctail <= chead + cmt_cnt;
       end else begin
+        // $display("LSB wants to handle flag when head is read at %h!", pc[chead]);
         // 如果是读，这个读是错的，立即停止这个读并且翻篇
         ctail <= thead + cmt_cnt;
-        if (dc_wait) begin  // 刚才去掉了&&dc_en_i，即立刻停止
-          //但是要不要在没有dc_wait的时候推进chead呢？
-          dc_wait <= 0;
-          chead   <= thead;
-        end
+        chead <= thead;
+        if (dc_wait) dc_wait <= 0;
+        op[chead] <= 0;  // 这个不能忘记！否则可能导致错误的ready！
+
       end
     end else if (en) begin
       // reset
@@ -188,13 +201,14 @@ module load_store_buffer (
         qk[ctail]  <= rf_qk_i;
         vj[ctail]  <= rf_vj_i;
         vk[ctail]  <= rf_vk_i;
+        pc[ctail]  <= rf_pc_i;
 
         if (ldb_en_o) begin
           if (rf_qj_i == ldb_q_o) begin
             qj[ctail] <= 0;
             vj[ctail] <= ldb_v_o;
           end
-          if (rf_qk_i == ldb_v_o) begin
+          if (rf_qk_i == ldb_q_o) begin
             qk[ctail] <= 0;
             vk[ctail] <= ldb_v_o;
           end
@@ -235,7 +249,7 @@ module load_store_buffer (
         end
 
         ctail <= ttail;
-        full  <= ttail == chead || ttail + 1 == chead;
+        // full  <= ttail == chead || ttail + 1 == chead;
       end
 
       // update
@@ -257,6 +271,7 @@ module load_store_buffer (
         dc_adr_o <= vj[chead] + imm[chead];
         dc_dat_o <= vk[chead];
         dc_op_o  <= op[chead];
+        dc_pc_o  <= pc[chead];
         if (ls[chead]) begin
           dc_wait <= 1;
           dc_en_o <= 1;
@@ -281,10 +296,11 @@ module load_store_buffer (
       end
 
       // if DC finished, submit and pop
+      // TODO 是否要在此时继续送出ready？-
       if (dc_en_i && dc_wait) begin
         dc_wait <= 0;
         if (ls[chead]) begin
-          $display("Load value %h", dc_dat_i);
+          // $display("Load value %h", dc_dat_i);
           // reply data
           for (i = 0; i < `LSB_S; i = i + 1) begin
             if (qd[chead] == qj[i]) begin
@@ -303,12 +319,13 @@ module load_store_buffer (
           last_v   <= dc_dat_i;
         end
         chead <= thead;
-        if (!rf_en_i && !(ttail == chead || ttail + 1 == chead)) full <= 0;
+        op[chead] <= 0;
+        // if (!rf_en_i && !(ttail == chead || ttail + 1 == chead)) full <= 0;
       end
 
       // lsb只能更新自己现在有的数据，rob只能在lsb数据来到后更新。
       // 如果rob_en_i和rob_en_o同时出现，双方数据都未到，则这个被传输的q不能被更新。
-      // 解决法：不麻烦每次commit搞一下更新了，如果某个时刻两个都是亮的，就把
+      // 解决法：不麻烦每次commit搞一下更新了，如果某个时刻两个都是亮的，就
       // 判断上次en_o输出的值能否更新这个。
     end
   end

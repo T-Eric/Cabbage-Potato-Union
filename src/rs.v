@@ -102,6 +102,8 @@ module reser_station (
       // non-load-store instruction
       if (rf_en_i) begin
         // TODO 传入值如果没有需要q的，直接提交。尽管这个逻辑会很复杂？
+        // 不算复杂，只需要对lsb和cdb做一判断
+
         busy[empty_one] <= 1;
         op[empty_one]   <= rf_op_i;
         ic[empty_one]   <= rf_ic_i;
