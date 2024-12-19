@@ -60,7 +60,6 @@ module ins_fetch (
   assign copcode = {ic_ins_i[15:13], ic_ins_i[1:0]};
 
   assign ic_pc_o = pc;
-  assign bp_tbt_o = pc;
   assign bp_pc_o = pc;
   assign bp_en_o = br_flag_i;
   assign bp_abr_o = br_abr_i;

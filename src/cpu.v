@@ -507,7 +507,7 @@ module cpu (
   always @(posedge clk_in) begin
     counter <= counter + 1;
     if (counter % 500 == 0) begin
-      $display("---Time: %dns---", counter * 2);
+    //   $display("---Time: %dns---", counter * 2);
     end
   end
 

@@ -84,7 +84,7 @@ module load_store_buffer (
   // FIFO Load-Store
   reg [`ROB_BIT-1:0] chead, ctail;  // [) pointer
   wire [`ROB_BIT-1:0] thead, ttail;
-  wire empty, full;
+  wire empty;
 
   assign thead = chead + 1;
   assign ttail = ctail + 1;

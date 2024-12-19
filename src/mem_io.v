@@ -140,7 +140,7 @@ module memory_io_controller (
           case (dc_op_i)
             `LB: ddat <= {{24{ram_dat_i[7]}}, ram_dat_i};
             `LBU: ddat <= {24'b0, ram_dat_i};
-            `LH: ddat <= {{16{ram_dat_i[15]}}, ram_dat_i, ddat[7:0]};
+            `LH: ddat <= {{16{ram_dat_i[7]}}, ram_dat_i, ddat[7:0]};
             `LHU: ddat <= {16'b0, ram_dat_i, ddat[7:0]};
             `LW: ddat[31:24] <= ram_dat_i;
             default: ;
