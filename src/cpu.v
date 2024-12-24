@@ -1,18 +1,17 @@
 // RISCV32 CPU top module
 // port modification allowed for debugging purposes
-// `include "src/head.v"
-`include "src/alu.v"
-`include "src/bp.v"
-`include "src/data_cache.v"
-`include "src/decoder.v"
-`include "src/ins_cache.v"
-`include "src/ins_fetch.v"
-`include "src/lsb.v"
-`include "src/mem_io.v"
-`include "src/ram.v"
-`include "src/rf.v"
-`include "src/rob.v"
-`include "src/rs.v"
+// `include "head.v"
+`include "alu.v"
+`include "bp.v"
+`include "decoder.v"
+`include "ins_cache.v"
+`include "ins_fetch.v"
+`include "lsb.v"
+`include "mem_io.v"
+`include "ram.v"
+`include "rf.v"
+`include "rob.v"
+`include "rs.v"
 
 `ifndef CPU_V
 `define CPU_V
@@ -64,7 +63,7 @@ module cpu (
   wire [    `DAT_W-1:0] is_rf_imm;
   wire [    `DAT_W-1:0] is_rf_pc;
   wire                  is_rob_en;
-  wire                  is_rob_ic;
+//   wire                  is_rob_ic;
   wire [     `OP_W-1:0] is_rob_op;
   wire [           1:0] is_rob_tp;
   wire [  `REG_BIT-1:0] is_rob_rd;
@@ -421,7 +420,7 @@ module cpu (
       .en (rdy_in),
 
       .is_en_i (is_rob_en),
-      .is_ic_i (is_rob_ic),
+    //   .is_ic_i (is_rob_ic),
       .is_tp_i (is_rob_tp),
       .is_op_i (is_rob_op),
       .is_rd_i (is_rob_rd),
@@ -507,7 +506,7 @@ module cpu (
   always @(posedge clk_in) begin
     counter <= counter + 1;
     if (counter % 500 == 0) begin
-    //   $display("---Time: %dns---", counter * 2);
+      //   $display("---Time: %dns---", counter * 2);
     end
   end
 

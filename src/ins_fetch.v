@@ -1,7 +1,7 @@
 // Instruction Fetcher
 // Connect: ins_cache,decoder
 // Function: fetch, judge rv32i or c, then issue to rf and rob
-`include "src/head.v"
+`include "head.v"
 `ifndef IF_V
 `define IF_V
 

@@ -1,7 +1,7 @@
 // Branch Predictor
 // Connect: Ins-Fetch
 // Function: take [7:2] of pc to predict branch or not.
-`include "src/head.v"
+`include "head.v"
 `ifndef BP_V
 `define BP_V
 

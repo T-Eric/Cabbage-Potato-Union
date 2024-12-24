@@ -1,8 +1,8 @@
 // riscv top module file
 // modification allowed for debugging purposes
-`include "src/ram.v"
-`include "src/cpu.v"
-`include "src/hci.v"
+`include "ram.v"
+`include "cpu.v"
+`include "hci.v"
 `ifndef RISCV_TOP_V
 `define RISCV_TOP_V
 

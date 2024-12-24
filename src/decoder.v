@@ -1,7 +1,7 @@
 // Decoder
 // Connect: Ins-Fetch, 
 // Function: Decode the ins from IC, then Issue. Careless about branching.
-`include "src/head.v"
+`include "head.v"
 `ifndef DEC_V
 `define DEC_V
 
@@ -97,6 +97,12 @@ module decoder (
     end
 
     ins = if_ins_i;
+    op  = 0;
+    tp  = 0;
+    imm = 0;
+    rd  = 0;
+    rs1 = 0;
+    rs2 = 0;
     pbr = if_pbr_i;
 
     if (if_ic_i) begin

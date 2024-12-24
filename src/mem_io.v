@@ -1,7 +1,7 @@
 // Memory IO Controller
 // Connect: ic, dc
 // Function: directly connect ram, read according to different modes
-`include "src/head.v"
+`include "head.v"
 `ifndef MC_V
 `define MC_V
 

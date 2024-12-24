@@ -1,6 +1,6 @@
 // load-store buffer
 // Function: FIFO sender, react with dc to store and load
-`include "src/head.v"
+`include "head.v"
 `ifndef LSB_V
 `define LSB_V
 
@@ -103,32 +103,29 @@ module load_store_buffer (
   reg [`ROB_BIT-1:0] last_q;
   reg [`DAT_W-1:0] last_v;
 
-  // whether it's ready and we can directly submit
+  // // ---debug---
+  // wire [`OP_W-1:0] DHop;
+  // wire [`DAT_W-1:0] DHvj;
+  // wire [`DAT_W-1:0] DHvk;
+  // wire [`DAT_W-1:0] DHimm;
+  // wire [`ROB_BIT-1:0] DHqj;
+  // wire [`ROB_BIT-1:0] DHqk;
+  // wire [`ROB_BIT-1:0] DHqd;
+  // wire [`DAT_W-1:0] DHpc;
+  // wire DHls;
+  // wire DHready;
 
-
-  // ---debug---
-  wire [`OP_W-1:0] DHop;
-  wire [`DAT_W-1:0] DHvj;
-  wire [`DAT_W-1:0] DHvk;
-  wire [`DAT_W-1:0] DHimm;
-  wire [`ROB_BIT-1:0] DHqj;
-  wire [`ROB_BIT-1:0] DHqk;
-  wire [`ROB_BIT-1:0] DHqd;
-  wire [`DAT_W-1:0] DHpc;
-  wire DHls;
-  wire DHready;
-
-  assign DHop = op[chead];
-  assign DHvj = vj[chead];
-  assign DHvk = vk[chead];
-  assign DHqj = qj[chead];
-  assign DHqk = qk[chead];
-  assign DHqd = qd[chead];
-  assign DHimm = imm[chead];
-  assign DHls = ls[chead];
-  assign DHpc = pc[chead];
-  assign DHready = ready[chead];
-  // ---debug---
+  // assign DHop = op[chead];
+  // assign DHvj = vj[chead];
+  // assign DHvk = vk[chead];
+  // assign DHqj = qj[chead];
+  // assign DHqk = qk[chead];
+  // assign DHqd = qd[chead];
+  // assign DHimm = imm[chead];
+  // assign DHls = ls[chead];
+  // assign DHpc = pc[chead];
+  // assign DHready = ready[chead];
+  // // ---debug---
 
   // 队列塞满容易寄，故保证每次空个两格
   integer i;

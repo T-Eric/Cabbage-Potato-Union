@@ -26,7 +26,7 @@
 ***************************************************************************************************/
 
 // modification allowed for debugging purposes
-`include "src/common/uart/uart.v"
+`include "common/uart/uart.v"
 `ifndef HCI_V
 `define HCI_V
 

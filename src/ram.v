@@ -1,5 +1,5 @@
 // implements 128KB of on-board RAM
-`include "src/common/block_ram/block_ram.v"
+`include "common/block_ram/block_ram.v"
 `ifndef RAM_V
 `define RAM_V
 

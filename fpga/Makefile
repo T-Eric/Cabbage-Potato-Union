@@ -1,4 +1,4 @@
 HEADERS = $(shell find . -name '*.h')
 
-fpga: controller.cpp $(HEADERS)
-	g++ -std=c++17 -o fpga controller.cpp -lserial
+fpga: fpga.cpp $(HEADERS)
+	g++ -std=c++20 -O2 -o fpga fpga.cpp -lserial -lelf

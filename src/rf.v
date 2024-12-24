@@ -1,5 +1,5 @@
 // Register File, 32 registers
-`include "src/head.v"
+`include "head.v"
 `ifndef RF_V
 `define RF_V
 
@@ -240,76 +240,76 @@ module register_file (
     end
   end
 
-  // ---debug---
-  wire[`DAT_W-1:0]reg_zero, reg_ra, reg_sp, reg_gp, reg_tp, reg_t0, reg_t1, reg_t2, reg_s0, reg_s1, reg_a0, reg_a1, reg_a2, reg_a3, reg_a4, reg_a5, reg_a6, reg_a7, reg_s2, reg_s3, reg_s4, reg_s5, reg_s6, reg_s7, reg_s8, reg_s9, reg_s10, reg_s11, reg_t3, reg_t4, reg_t5, reg_t6;
-  wire[`ROB_BIT-1:0]reg_zero_q, reg_ra_q, reg_sp_q, reg_gp_q, reg_tp_q, reg_t0_q, reg_t1_q, reg_t2_q, reg_s0_q, reg_s1_q, reg_a0_q, reg_a1_q, reg_a2_q, reg_a3_q, reg_a4_q, reg_a5_q, reg_a6_q, reg_a7_q, reg_s2_q, reg_s3_q, reg_s4_q, reg_s5_q, reg_s6_q, reg_s7_q, reg_s8_q, reg_s9_q, reg_s10_q, reg_s11_q, reg_t3_q, reg_t4_q, reg_t5_q, reg_t6_q;
+  // // ---debug---
+  // wire[`DAT_W-1:0]reg_zero, reg_ra, reg_sp, reg_gp, reg_tp, reg_t0, reg_t1, reg_t2, reg_s0, reg_s1, reg_a0, reg_a1, reg_a2, reg_a3, reg_a4, reg_a5, reg_a6, reg_a7, reg_s2, reg_s3, reg_s4, reg_s5, reg_s6, reg_s7, reg_s8, reg_s9, reg_s10, reg_s11, reg_t3, reg_t4, reg_t5, reg_t6;
+  // wire[`ROB_BIT-1:0]reg_zero_q, reg_ra_q, reg_sp_q, reg_gp_q, reg_tp_q, reg_t0_q, reg_t1_q, reg_t2_q, reg_s0_q, reg_s1_q, reg_a0_q, reg_a1_q, reg_a2_q, reg_a3_q, reg_a4_q, reg_a5_q, reg_a6_q, reg_a7_q, reg_s2_q, reg_s3_q, reg_s4_q, reg_s5_q, reg_s6_q, reg_s7_q, reg_s8_q, reg_s9_q, reg_s10_q, reg_s11_q, reg_t3_q, reg_t4_q, reg_t5_q, reg_t6_q;
 
-  assign reg_zero = regs[0];
-  assign reg_ra = regs[1];
-  assign reg_sp = regs[2];
-  assign reg_gp = regs[3];
-  assign reg_tp = regs[4];
-  assign reg_t0 = regs[5];
-  assign reg_t1 = regs[6];
-  assign reg_t2 = regs[7];
-  assign reg_s0 = regs[8];
-  assign reg_s1 = regs[9];
-  assign reg_a0 = regs[10];
-  assign reg_a1 = regs[11];
-  assign reg_a2 = regs[12];
-  assign reg_a3 = regs[13];
-  assign reg_a4 = regs[14];
-  assign reg_a5 = regs[15];
-  assign reg_a6 = regs[16];
-  assign reg_a7 = regs[17];
-  assign reg_s2 = regs[18];
-  assign reg_s3 = regs[19];
-  assign reg_s4 = regs[20];
-  assign reg_s5 = regs[21];
-  assign reg_s6 = regs[22];
-  assign reg_s7 = regs[23];
-  assign reg_s8 = regs[24];
-  assign reg_s9 = regs[25];
-  assign reg_s10 = regs[26];
-  assign reg_s11 = regs[27];
-  assign reg_t3 = regs[28];
-  assign reg_t4 = regs[29];
-  assign reg_t5 = regs[30];
-  assign reg_t6 = regs[31];
+  // assign reg_zero = regs[0];
+  // assign reg_ra = regs[1];
+  // assign reg_sp = regs[2];
+  // assign reg_gp = regs[3];
+  // assign reg_tp = regs[4];
+  // assign reg_t0 = regs[5];
+  // assign reg_t1 = regs[6];
+  // assign reg_t2 = regs[7];
+  // assign reg_s0 = regs[8];
+  // assign reg_s1 = regs[9];
+  // assign reg_a0 = regs[10];
+  // assign reg_a1 = regs[11];
+  // assign reg_a2 = regs[12];
+  // assign reg_a3 = regs[13];
+  // assign reg_a4 = regs[14];
+  // assign reg_a5 = regs[15];
+  // assign reg_a6 = regs[16];
+  // assign reg_a7 = regs[17];
+  // assign reg_s2 = regs[18];
+  // assign reg_s3 = regs[19];
+  // assign reg_s4 = regs[20];
+  // assign reg_s5 = regs[21];
+  // assign reg_s6 = regs[22];
+  // assign reg_s7 = regs[23];
+  // assign reg_s8 = regs[24];
+  // assign reg_s9 = regs[25];
+  // assign reg_s10 = regs[26];
+  // assign reg_s11 = regs[27];
+  // assign reg_t3 = regs[28];
+  // assign reg_t4 = regs[29];
+  // assign reg_t5 = regs[30];
+  // assign reg_t6 = regs[31];
 
-  assign reg_zero_q = q[0];
-  assign reg_ra_q = q[1];
-  assign reg_sp_q = q[2];
-  assign reg_gp_q = q[3];
-  assign reg_tp_q = q[4];
-  assign reg_t0_q = q[5];
-  assign reg_t1_q = q[6];
-  assign reg_t2_q = q[7];
-  assign reg_s0_q = q[8];
-  assign reg_s1_q = q[9];
-  assign reg_a0_q = q[10];
-  assign reg_a1_q = q[11];
-  assign reg_a2_q = q[12];
-  assign reg_a3_q = q[13];
-  assign reg_a4_q = q[14];
-  assign reg_a5_q = q[15];
-  assign reg_a6_q = q[16];
-  assign reg_a7_q = q[17];
-  assign reg_s2_q = q[18];
-  assign reg_s3_q = q[19];
-  assign reg_s4_q = q[20];
-  assign reg_s5_q = q[21];
-  assign reg_s6_q = q[22];
-  assign reg_s7_q = q[23];
-  assign reg_s8_q = q[24];
-  assign reg_s9_q = q[25];
-  assign reg_s10_q = q[26];
-  assign reg_s11_q = q[27];
-  assign reg_t3_q = q[28];
-  assign reg_t4_q = q[29];
-  assign reg_t5_q = q[30];
-  assign reg_t6_q = q[31];
-  // ---debug---
+  // assign reg_zero_q = q[0];
+  // assign reg_ra_q = q[1];
+  // assign reg_sp_q = q[2];
+  // assign reg_gp_q = q[3];
+  // assign reg_tp_q = q[4];
+  // assign reg_t0_q = q[5];
+  // assign reg_t1_q = q[6];
+  // assign reg_t2_q = q[7];
+  // assign reg_s0_q = q[8];
+  // assign reg_s1_q = q[9];
+  // assign reg_a0_q = q[10];
+  // assign reg_a1_q = q[11];
+  // assign reg_a2_q = q[12];
+  // assign reg_a3_q = q[13];
+  // assign reg_a4_q = q[14];
+  // assign reg_a5_q = q[15];
+  // assign reg_a6_q = q[16];
+  // assign reg_a7_q = q[17];
+  // assign reg_s2_q = q[18];
+  // assign reg_s3_q = q[19];
+  // assign reg_s4_q = q[20];
+  // assign reg_s5_q = q[21];
+  // assign reg_s6_q = q[22];
+  // assign reg_s7_q = q[23];
+  // assign reg_s8_q = q[24];
+  // assign reg_s9_q = q[25];
+  // assign reg_s10_q = q[26];
+  // assign reg_s11_q = q[27];
+  // assign reg_t3_q = q[28];
+  // assign reg_t4_q = q[29];
+  // assign reg_t5_q = q[30];
+  // assign reg_t6_q = q[31];
+  // // ---debug---
 endmodule
 
 `endif

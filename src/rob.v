@@ -3,7 +3,7 @@
 // Function: FIFO queue, get and commit ins in order
 // if need branching, raise flag_br, send to lsb, fet and rs
 // call them stop and digest! then tell pc to jump
-`include "src/head.v"
+`include "head.v"
 `ifndef ROB_V
 `define ROB_V
 
@@ -14,7 +14,7 @@ module reorder_buffer (
 
     // from/to decoder: new ins' info
     input is_en_i,
-    input is_ic_i,
+    // input is_ic_i,
     input [1:0] is_tp_i,  // branch, store, load, normal  
     input [`OP_W-1:0] is_op_i,
     input [`REG_BIT - 1:0] is_rd_i,
@@ -63,7 +63,7 @@ module reorder_buffer (
 
   // sheet
   reg [`OP_W-1:0] op[`ROB_S-1:0];
-  reg ic[`ROB_S-1:0];
+  // reg ic[`ROB_S-1:0];
   reg [1:0] tp[`ROB_S-1:0];  // 00:branch, 01:store, 10:load, 11: alu operation
   reg [`REG_BIT-1:0] rd[`ROB_S-1:0];  // if alu op, reg dest
   reg [`DAT_W-1:0] v[`ROB_S-1:0];  // the value
@@ -92,38 +92,35 @@ module reorder_buffer (
   assign rf_rdyvj_o = v[rf_reqqj_i];
   assign rf_rdyvk_o = v[rf_reqqk_i];
 
-  // branching
-  reg br;  // 1 means missed prediction and jump
+  // // ---debug---
+  // wire [`OP_W-1:0] DHop;
+  // wire DHic;
+  // wire [1:0] DHtp;
+  // wire [`REG_BIT-1:0] DHrd;
+  // wire [`DAT_W-1:0] DHv;
+  // wire [`DAT_W-1:0] DHpc;
+  // wire DHpbr;
+  // wire DHcbr;
+  // wire [`DAT_W-1:0] DHcbt;
+  // wire DHready;
 
-  // ---debug---
-  wire [`OP_W-1:0] DHop;
-  wire DHic;
-  wire [1:0] DHtp;
-  wire [`REG_BIT-1:0] DHrd;
-  wire [`DAT_W-1:0] DHv;
-  wire [`DAT_W-1:0] DHpc;
-  wire DHpbr;
-  wire DHcbr;
-  wire [`DAT_W-1:0] DHcbt;
-  wire DHready;
-
-  assign DHop = op[chead];
-  assign DHic = ic[chead];
-  assign DHtp = tp[chead];
-  assign DHrd = rd[chead];
-  assign DHv = v[chead];
-  assign DHpc = pc[chead];
-  assign DHpbr = pbr[chead];
-  assign DHcbr = cbr[chead];
-  assign DHcbt = cbt[chead];
-  assign DHready = ready[chead];
-  // ---debug---
+  // assign DHop = op[chead];
+  // // assign DHic = ic[chead];
+  // assign DHtp = tp[chead];
+  // assign DHrd = rd[chead];
+  // assign DHv = v[chead];
+  // assign DHpc = pc[chead];
+  // assign DHpbr = pbr[chead];
+  // assign DHcbr = cbr[chead];
+  // assign DHcbt = cbt[chead];
+  // assign DHready = ready[chead];
+  // // ---debug---
 
   always @(posedge clk) begin
     if (rst || br_flag) begin
       for (i = 0; i < `ROB_S; i = i + 1) begin
         op[i] <= 0;
-        ic[i] <= 0;
+        // ic[i] <= 0;
         tp[i] <= 0;
         rd[i] <= 0;
         v[i] <= 0;
@@ -156,7 +153,7 @@ module reorder_buffer (
       if (is_en_i) begin
         ready[ctail] <= 0;
         v[ctail] <= 0;
-        ic[ctail] <= is_ic_i;
+        // ic[ctail] <= is_ic_i;
         tp[ctail] <= is_tp_i;
         pbr[ctail] <= is_pbr_i;  // predicted
         pc[ctail] <= is_pc_i;

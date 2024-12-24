@@ -3,6 +3,11 @@
   "files.associations": {
     "log": "plaintext",
     "*.v": "verilog",
-    "io.h": "c"
+    "io.h": "c",
+    "stdexcept": "cpp",
+    "bit": "cpp",
+    "cstdint": "cpp",
+    "iostream": "cpp",
+    "limits": "cpp"
   }
 }

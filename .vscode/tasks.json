@@ -14,14 +14,33 @@
       "options": {
         "cwd": "${fileDirname}"
       },
-      "problemMatcher": [
-        "$gcc"
-      ],
+      "problemMatcher": ["$gcc"],
       "group": {
         "kind": "build",
         "isDefault": true
       },
       "detail": "调试器生成的任务。"
+    },
+    {
+      "label": "build",
+      "type": "shell",
+      "command": "g++",
+      "args": [
+        "-g",
+        "${workspaceFolder}/src/main.cpp",
+        "-o",
+        "${workspaceFolder}/bin/main",
+        "-I",
+        "/usr/include/libserial",
+        "-L",
+        "/usr/lib/x86_64-linux-gnu",
+        "-lserial"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$gcc"]
     }
   ],
   "version": "2.0.0"

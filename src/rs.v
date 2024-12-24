@@ -2,7 +2,7 @@
 // Connect: ROB(in), LSB(in), ALU(io)
 // Function: temp save stall instructions, wait for data to send to ALU
 
-`include "src/head.v"
+`include "head.v"
 `ifndef RS_V
 `define RS_V
 
@@ -165,7 +165,7 @@ module reser_station (
       end
 
       // given for alu
-      if (alu_en_o) busy[send_one] = 0;
+      if (alu_en_o) busy[send_one] <= 0;
     end
   end
 
