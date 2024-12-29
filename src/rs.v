@@ -2,6 +2,8 @@
 // Connect: ROB(in), LSB(in), ALU(io)
 // Function: temp save stall instructions, wait for data to send to ALU
 
+// 在综合后发现组合逻辑输出alu过于复杂，因此延迟一个周期改成reg
+
 `include "head.v"
 `ifndef RS_V
 `define RS_V
@@ -32,14 +34,15 @@ module reser_station (
     input [`DAT_W-1:0] cdb_v_i,
 
     // to alu: calc
-    output alu_en_o,
-    output [`OP_W-1:0] alu_op_o,
-    output alu_ic_o,
-    output [`ROB_BIT-1:0] alu_qd_o,
-    output [`DAT_W-1:0] alu_vs_o,
-    output [`DAT_W-1:0] alu_vt_o,
-    output [`DAT_W-1:0] alu_imm_o,
-    output [`DAT_W-1:0] alu_pc_o,
+    // 延迟一周期，变为reg
+    output reg alu_en_o,
+    output reg [`OP_W-1:0] alu_op_o,
+    output reg alu_ic_o,
+    output reg [`ROB_BIT-1:0] alu_qd_o,
+    output reg [`DAT_W-1:0] alu_vs_o,
+    output reg [`DAT_W-1:0] alu_vt_o,
+    output reg [`DAT_W-1:0] alu_imm_o,
+    output reg [`DAT_W-1:0] alu_pc_o,
 
     // branch
     input br_flag
@@ -60,19 +63,21 @@ module reser_station (
   // TA启发：组合逻辑找第一个空entry，第一个可送entry
   // 参考https://zhuanlan.zhihu.com/p/647874179
   // 直接把alu_o连接到可送entry条目是可行且很快的
+  // opt: 其实不行。。。时序会爆到-100+ns
   wire [`RS_BIT-1:0] empty_one, send_one, empty_find[`RS_S:0], send_find[`RS_S:0];
   assign empty_find[0] = 0;
   assign send_find[0] = 0;
   assign empty_one = empty_find[`RS_S];
   assign send_one = send_find[`RS_S];
-  assign alu_en_o = send[0] == 1 || send_one != 0;
-  assign alu_op_o = op[send_one];
-  assign alu_ic_o = ic[send_one];
-  assign alu_qd_o = qd[send_one];
-  assign alu_vs_o = vj[send_one];
-  assign alu_vt_o = vk[send_one];
-  assign alu_imm_o = imm[send_one];
-  assign alu_pc_o = pc[send_one];
+
+  // assign alu_en_o = send[0] == 1 || send_one != 0;
+  // assign alu_op_o = op[send_one];
+  // assign alu_ic_o = ic[send_one];
+  // assign alu_qd_o = qd[send_one];
+  // assign alu_vs_o = vj[send_one];
+  // assign alu_vt_o = vk[send_one];
+  // assign alu_imm_o = imm[send_one];
+  // assign alu_pc_o = pc[send_one];
 
   genvar j;
   generate
@@ -98,8 +103,10 @@ module reser_station (
         qd[i]   <= 0;
         pc[i]   <= 0;
       end
+      alu_en_o <= 0;
     end else if (en) begin
       // non-load-store instruction
+      alu_en_o <= 0;
       if (rf_en_i) begin
         // TODO 传入值如果没有需要q的，直接提交。尽管这个逻辑会很复杂？
         // 不算复杂，只需要对lsb和cdb做一判断
@@ -165,7 +172,20 @@ module reser_station (
       end
 
       // given for alu
-      if (alu_en_o) busy[send_one] <= 0;
+      // if (alu_en_o) busy[send_one] <= 0;
+
+      // give it to alu
+      if (send_one != 0 || send[0] == 1) begin
+        alu_en_o <= 1;
+        alu_op_o <= op[send_one];
+        alu_ic_o <= ic[send_one];
+        alu_qd_o <= qd[send_one];
+        alu_vs_o <= vj[send_one];
+        alu_vt_o <= vk[send_one];
+        alu_imm_o <= imm[send_one];
+        alu_pc_o <= pc[send_one];
+        busy[send_one] <= 0;
+      end
     end
   end
 

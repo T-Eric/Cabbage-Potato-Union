@@ -23,7 +23,7 @@ module memory_io_controller (
     input [2:0] dc_len_i,
     input [`DAT_W-1:0] dc_adr_i,
     input [`DAT_W-1:0] dc_dat_i,
-    input [`DAT_W-1:0] dc_pc_i,
+    // input [`DAT_W-1:0] dc_pc_i,
     output reg dc_en_o,
     output [`DAT_W-1:0] dc_dat_o,
 
@@ -43,7 +43,7 @@ module memory_io_controller (
   reg [`DAT_W-1:0] idat, ddat;
   reg [2:0] iprc, dprc;  // process counter
   reg [2:0] ilen, dlen;
-  reg [`DAT_W-1:0] dpc;
+  // reg [`DAT_W-1:0] dpc;
 
   assign ram_adr_o  = icdc ? dadr : iadr;
   assign ram_rwen_o = icdc ? dc_rwen_i : 0;
@@ -63,7 +63,7 @@ module memory_io_controller (
       idat <= 0;
       ddat <= 0;
       dlen <= 0;
-      dpc <= 0;
+      // dpc <= 0;
       ram_dat_o <= 0;
     end else if (en) begin
       // reset
@@ -88,7 +88,7 @@ module memory_io_controller (
         dlen <= dc_rwen_i ? dc_len_i - 1 : dc_len_i;
         dadr <= dc_adr_i;
         dprc <= 0;
-        dpc  <= dc_pc_i;
+        // dpc  <= dc_pc_i;
 
         // 此时已经开始读写了，但是读在下个时期才会到
         // 但是现在必须立刻同步开始写
@@ -154,13 +154,13 @@ module memory_io_controller (
             default: ;
           endcase
           ddat <= 0;
-          // $display("^At %h Store value %h to adr %h", dpc, ddat, dadr - dlen);
+          // $display("^At  Store value %h to adr %h", ddat, dadr - dlen);
         end
         dadr <= dadr + 1;
         dprc <= 0;
         dc <= 0;
         dc_en_o <= 1;
-        dpc <= 0;
+        // dpc <= 0;
         icdc <= 0;
       end
       if (!icdc && ic && iprc == ilen) begin

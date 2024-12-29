@@ -63,7 +63,7 @@ module cpu (
   wire [    `DAT_W-1:0] is_rf_imm;
   wire [    `DAT_W-1:0] is_rf_pc;
   wire                  is_rob_en;
-//   wire                  is_rob_ic;
+  //   wire                  is_rob_ic;
   wire [     `OP_W-1:0] is_rob_op;
   wire [           1:0] is_rob_tp;
   wire [  `REG_BIT-1:0] is_rob_rd;
@@ -224,7 +224,7 @@ module cpu (
       .rf_pc_o (is_rf_pc),
 
       .rob_en_o (is_rob_en),
-      .rob_ic_o (is_rob_ic),
+      // .rob_ic_o (is_rob_ic),
       .rob_tp_o (is_rob_tp),
       .rob_rd_o (is_rob_rd),
       .rob_pc_o (is_rob_pc),
@@ -294,7 +294,7 @@ module cpu (
       .rf_vk_i (rf_lsb_vk),
       .rf_qd_i (rf_lsb_qd),
       .rf_imm_i(rf_lsb_imm),
-      .rf_pc_i (rf_lsb_pc),
+      // .rf_pc_i (rf_lsb_pc),
 
       // Visit Memory
       .dc_en_o  (lsb_mc_en),
@@ -303,7 +303,7 @@ module cpu (
       .dc_len_o (lsb_mc_len),
       .dc_adr_o (lsb_mc_adr),
       .dc_dat_o (lsb_mc_dat),
-      .dc_pc_o  (lsb_mc_pc),
+      // .dc_pc_o  (lsb_mc_pc),
       .dc_en_i  (mc_lsb_en),
       .dc_dat_i (mc_lsb_dat),
 
@@ -342,7 +342,7 @@ module cpu (
       .dc_len_i (lsb_mc_len),
       .dc_adr_i (lsb_mc_adr),
       .dc_dat_i (lsb_mc_dat),
-      .dc_pc_i  (lsb_mc_pc),
+      // .dc_pc_i  (lsb_mc_pc),
       .dc_en_o  (mc_lsb_en),
       .dc_dat_o (mc_lsb_dat),
 
@@ -401,7 +401,7 @@ module cpu (
       .lsb_qd_o (rf_lsb_qd),
       .lsb_op_o (rf_lsb_op),
       .lsb_imm_o(rf_lsb_imm),
-      .lsb_pc_o (rf_lsb_pc),
+      // .lsb_pc_o (rf_lsb_pc),
 
       .cdb_en_i(cdb_en),
       .cdb_q_i (cdb_q),
@@ -420,7 +420,7 @@ module cpu (
       .en (rdy_in),
 
       .is_en_i (is_rob_en),
-    //   .is_ic_i (is_rob_ic),
+      //   .is_ic_i (is_rob_ic),
       .is_tp_i (is_rob_tp),
       .is_op_i (is_rob_op),
       .is_rd_i (is_rob_rd),
@@ -505,8 +505,8 @@ module cpu (
 
   always @(posedge clk_in) begin
     counter <= counter + 1;
-    if (counter % 500 == 0) begin
-      //   $display("---Time: %dns---", counter * 2);
+    if (counter % 50 == 0) begin
+        // $display("---Time: %dns---", counter * 2);
     end
   end
 

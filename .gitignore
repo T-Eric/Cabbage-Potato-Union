@@ -11,5 +11,3 @@ testcase/*
 MakeFile
 REIMU/*
 .vscode/*
-serial/*
-serial

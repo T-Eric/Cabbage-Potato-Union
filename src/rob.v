@@ -78,10 +78,10 @@ module reorder_buffer (
   wire [`ROB_BIT-1:0] thead, ttail, tttail, ttttail;
   wire empty;
 
-  assign thead = (chead + 5'b1 == 5'b0) ? 5'b1 : (chead + 5'b1);
-  assign ttail = (ctail + 5'b1 == 5'b0) ? 5'b1 : (ctail + 5'b1);
-  assign tttail = (ctail + 2 == 5'b0) ? 5'b1 : (ctail + 2);
-  assign ttttail = (ctail + 3 == 5'b0) ? 5'b1 : (ctail + 3);
+  assign thead = (chead + 4'b0001 == 4'b0) ? 4'b0001 : (chead + 4'b0001);
+  assign ttail = (ctail + 4'b0001 == 4'b0) ? 4'b0001 : (ctail + 4'b0001);
+  assign tttail = (ctail + 4'b0010 == 4'b0) ? 4'b0001 : (ctail + 4'b0010);
+  assign ttttail = (ctail + 4'b0011 == 4'b0) ? 4'b0001 : (ctail + 4'b0011);
   assign full = (ttail == chead) || (tttail == chead) || (ttttail == chead);
   assign empty = chead == ctail;
   assign rf_qd_o = ctail;
@@ -92,7 +92,7 @@ module reorder_buffer (
   assign rf_rdyvj_o = v[rf_reqqj_i];
   assign rf_rdyvk_o = v[rf_reqqk_i];
 
-  // // ---debug---
+  // ---debug---
   // wire [`OP_W-1:0] DHop;
   // wire DHic;
   // wire [1:0] DHtp;
@@ -114,7 +114,7 @@ module reorder_buffer (
   // assign DHcbr = cbr[chead];
   // assign DHcbt = cbt[chead];
   // assign DHready = ready[chead];
-  // // ---debug---
+  // ---debug---
 
   always @(posedge clk) begin
     if (rst || br_flag) begin

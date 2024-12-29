@@ -8,6 +8,8 @@
     "bit": "cpp",
     "cstdint": "cpp",
     "iostream": "cpp",
-    "limits": "cpp"
+    "limits": "cpp",
+    "vector": "cpp",
+    "format": "cpp"
   }
 }

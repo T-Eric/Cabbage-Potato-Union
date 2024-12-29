@@ -1,4 +1,4 @@
-  // constants definitions
+// constants definitions
 `ifndef HEAD_H
 `define HEAD_H
 `define DAT_W 32
@@ -12,14 +12,14 @@
 // Memory
 `define RAM_ADR_W 17
 // Reordered Buffer
-`define ROB_S 32// 1-based
-`define ROB_BIT 5
+`define ROB_S 16// 1-based
+`define ROB_BIT 4
 // Reservation Station
-`define RS_S 32
-`define RS_BIT 5
+`define RS_S 16
+`define RS_BIT 4
 // Load-Store Buffer
-`define LSB_S 32
-`define LSB_BIT 5
+`define LSB_S 16
+`define LSB_BIT 4
 // Instructions
 `define OP_W 6
 `define LUI 6'b000001

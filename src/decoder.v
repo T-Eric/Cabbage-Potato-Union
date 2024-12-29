@@ -30,7 +30,7 @@ module decoder (
 
     // to ROB, launch new item
     output rob_en_o,
-    output rob_ic_o,
+    // output rob_ic_o,
     output [`OP_W-1:0] rob_op_o,
     output [1:0] rob_tp_o,
     output [`REG_BIT-1:0] rob_rd_o,
@@ -54,7 +54,7 @@ module decoder (
   assign rf_imm_o  = imm;
   assign rf_pc_o   = if_pc_i;
 
-  assign rob_ic_o  = if_ic_i;
+  // assign rob_ic_o  = if_ic_i;
   assign rob_op_o  = op;
   assign rob_tp_o  = tp;
   assign rob_rd_o  = rd;
@@ -284,10 +284,11 @@ module decoder (
               imm = {24'b0, ins[8:7], ins[12:9], 2'b0};
               op  = `SW;
             end
+            default: ;
           endcase
         end
+        default: ;
       endcase
-
     end else begin
       // RV32I instructions
       rd  = ins[11:7];
@@ -364,26 +365,28 @@ module decoder (
         end
         7'b0010011: begin
           case (ifunct3)
-            3'b000: op = `ADDI;  // ADDI
-            3'b001: op = `SLLI;  // SLLI
-            3'b010: op = `SLTI;  // SLTI
-            3'b011: op = `SLTIU;  // SLTIU
-            3'b100: op = `XORI;  // XORI
-            3'b101: op = ifunct7 ? `SRAI : `SRLI;  // SRAI or SRLI
-            3'b110: op = `ORI;  // ORI
-            3'b111: op = `ANDI;  // ANDI
+            3'b000:  op = `ADDI;  // ADDI
+            3'b001:  op = `SLLI;  // SLLI
+            3'b010:  op = `SLTI;  // SLTI
+            3'b011:  op = `SLTIU;  // SLTIU
+            3'b100:  op = `XORI;  // XORI
+            3'b101:  op = ifunct7 ? `SRAI : `SRLI;  // SRAI or SRLI
+            3'b110:  op = `ORI;  // ORI
+            3'b111:  op = `ANDI;  // ANDI
+            default: op = 6'b000000;
           endcase
         end
         7'b0110011: begin
           case (ifunct3)
-            3'b000: op = ifunct7 ? `SUB : `ADD;  // ADD or SUB
-            3'b001: op = `SLL;  // SLL
-            3'b010: op = `SLT;  // SLT
-            3'b011: op = `SLTU;  // SLTU
-            3'b100: op = `XOR;  // XOR
-            3'b101: op = ifunct7 ? `SRA : `SRL;  // SRA or SRL
-            3'b110: op = `OR;  // OR
-            3'b111: op = `AND;  // AND
+            3'b000:  op = ifunct7 ? `SUB : `ADD;  // ADD or SUB
+            3'b001:  op = `SLL;  // SLL
+            3'b010:  op = `SLT;  // SLT
+            3'b011:  op = `SLTU;  // SLTU
+            3'b100:  op = `XOR;  // XOR
+            3'b101:  op = ifunct7 ? `SRA : `SRL;  // SRA or SRL
+            3'b110:  op = `OR;  // OR
+            3'b111:  op = `AND;  // AND
+            default: op = 6'b000000;
           endcase
         end
         default: op = 6'b000000;
