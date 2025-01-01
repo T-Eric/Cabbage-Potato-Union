@@ -62,7 +62,7 @@ run_sim: build_sim build_sim_test
 # Example:
 #	diff ./test/test.ans ./test/test.out
 
-fpga_device := /dev/ttyUSB1
+fpga_device := /dev/ttyUSB3
 fpga_run_mode := -T # or -I
 
 # Please manually load .bit file to FPGA

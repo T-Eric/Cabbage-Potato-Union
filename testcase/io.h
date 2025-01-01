@@ -27,6 +27,7 @@ static inline unsigned long inl()
     int sign=0;
     while ((ch=inb())) if(ch!='\n'&&ch!=' '&&ch!='\t') break;
     do {
+        outb(ch);
         if(ch=='-'&&!sign) sign=1;
         else if(ch<'0'||ch>'9') break;
         ret = ret * 10 + ch - '0';

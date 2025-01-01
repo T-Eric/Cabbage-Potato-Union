@@ -86,8 +86,8 @@ module single_port_ram_sync #(
       ram[i] = 0;
     end
     $readmemh(
-        // "\\\\wsl.localhost\\Ubuntu\\home\\teric\\projects\\helloworld\\GreatHomework3\\Cabbage-Potato-Union\\testcase\\sim\\000_array_test1.data",
-        "test.data",
+        "\\\\wsl.localhost\\Arch\\home\\Teric\\projects\\Cabbage-Potato-Union\\testcase\\sim\\000_array_test1.data",
+        // "test.data",
         ram, 0,
         2 ** ADDR_WIDTH - 1);  // add test.data to vivado project or specify a valid file path
   end

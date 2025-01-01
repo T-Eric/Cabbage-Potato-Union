@@ -11,6 +11,9 @@ int main(){
 	a=inl();
 	b=inl();
 	c=inl();
+	outlln(a);
+	outlln(b);
+	outlln(c);
 	outlln(tak(a,b,c));
 	return 0;
 }

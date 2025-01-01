@@ -24,7 +24,7 @@ module load_store_buffer (
     input [`DAT_W - 1:0] rf_vk_i,
     input [`ROB_BIT - 1:0] rf_qd_i,
     input [`DAT_W - 1:0] rf_imm_i,
-    // input [`DAT_W-1:0] rf_pc_i,  // 仅供调试 
+    input [`DAT_W-1:0] rf_pc_i,  // 用于对 Input 的判断
 
     // Visit Memory
     output reg                dc_en_o,
@@ -50,6 +50,7 @@ module load_store_buffer (
 
     // Commit STORE
     input  rob_cmt_i,
+    input [`DAT_W - 1:0] rob_rdypc_i,// 用于对 Input 的检测，防止在跳转前错误执行Load
     output rob_cmt_full,
 
     // ! Misprediction
@@ -68,16 +69,18 @@ module load_store_buffer (
   reg [`ROB_BIT-1:0] qj[`LSB_S-1:0];
   reg [`ROB_BIT-1:0] qk[`LSB_S-1:0];
   reg [`ROB_BIT-1:0] qd[`LSB_S-1:0];
-  // reg [`DAT_W-1:0] pc[`LSB_S-1:0];  //仅供调试
+  reg [`DAT_W-1:0] pc[`LSB_S-1:0];  // 判断 Input
 
   wire ls[`LSB_S-1:0];  // Load 1 or Store 0
+  wire is_input[`LSB_S-1:0];
   wire ready[`LSB_S-1:0];
 
   genvar j;
   generate
     for (j = 0; j < `LSB_S; j = j + 1) begin
       assign ls[j] = op[j][4] == 0;  // TODO 从原来的直接比等逻辑变为直接取位逻辑
-      assign ready[j] = (qj[j] == 0) && (qk[j] == 0);  // TODO 暂时把op!=0判断去除了
+      assign is_input[j] = (op[j][4]==0) && (qj[j]==0) && (vj[j][17:16]==2'b11);
+      assign ready[j] = (qj[j] == 0) && (qk[j] == 0) && (!is_input[j]||(is_input[j]&&rob_rdypc_i==pc[j]));  // TODO 暂时把op!=0判断去除了
     end
   endgenerate
 
@@ -152,7 +155,7 @@ module load_store_buffer (
         qj[i]  <= 0;
         qk[i]  <= 0;
         qd[i]  <= 0;
-        // pc[i]  <= 0;
+        pc[i]  <= 0;
       end
       ldb_en_o <= 0;
       ldb_q_o  <= 0;
@@ -177,6 +180,7 @@ module load_store_buffer (
       end else begin
         // $display("LSB wants to handle flag when head is read at %h!", pc[chead]);
         // 如果是读，这个读是错的，立即停止这个读并且翻篇
+        // 是否需要批量留下？没必要，因为后面没有有效load
         ctail <= thead + cmt_cnt;
         chead <= thead;
         if (dc_wait) dc_wait <= 0;
@@ -206,7 +210,7 @@ module load_store_buffer (
         qk[ctail]  <= rf_qk_i;
         vj[ctail]  <= rf_vj_i;
         vk[ctail]  <= rf_vk_i;
-        // pc[ctail]  <= rf_pc_i;
+        pc[ctail]  <= rf_pc_i;
 
         if (ldb_en_o) begin
           if (rf_qj_i == ldb_q_o) begin

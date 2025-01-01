@@ -142,6 +142,7 @@ module cpu (
   wire                  rob_rs_en;
   wire                  rob_rs_ic;
   wire                  rob_lsb_cmt;
+  wire [  `DAT_W - 1:0] rob_lsb_rdypc;
   wire                  rob_rf_en;
   wire [`REG_BIT - 1:0] rob_rf_rd;
   wire [`ROB_BIT - 1:0] rob_rf_q;
@@ -294,7 +295,7 @@ module cpu (
       .rf_vk_i (rf_lsb_vk),
       .rf_qd_i (rf_lsb_qd),
       .rf_imm_i(rf_lsb_imm),
-      // .rf_pc_i (rf_lsb_pc),
+      .rf_pc_i (rf_lsb_pc),
 
       // Visit Memory
       .dc_en_o  (lsb_mc_en),
@@ -317,6 +318,7 @@ module cpu (
       .cdb_v_i (cdb_v),
 
       .rob_cmt_i(rob_lsb_cmt),
+      .rob_rdypc_i(rob_lsb_rdypc),
       .rob_cmt_full(lsb_cmt_full),
 
       .br_flag(br_flag),
@@ -401,7 +403,7 @@ module cpu (
       .lsb_qd_o (rf_lsb_qd),
       .lsb_op_o (rf_lsb_op),
       .lsb_imm_o(rf_lsb_imm),
-      // .lsb_pc_o (rf_lsb_pc),
+      .lsb_pc_o (rf_lsb_pc),
 
       .cdb_en_i(cdb_en),
       .cdb_q_i (cdb_q),
@@ -428,6 +430,7 @@ module cpu (
       .is_pbr_i(is_rob_pbr),
 
       .lsb_cmt_o(rob_lsb_cmt),
+      .lsb_rdypc_o(rob_lsb_rdypc),
       .lsb_cmt_full_i(lsb_cmt_full),
       .lsb_en_i(ldb_en),
       .lsb_q_i(ldb_q),
@@ -497,18 +500,18 @@ module cpu (
 
   // indicator
 
-  reg [31:0] counter;
+//   reg [31:0] counter;
 
-  initial begin
-    counter = 0;
-  end
+//   initial begin
+//     counter = 0;
+//   end
 
-  always @(posedge clk_in) begin
-    counter <= counter + 1;
-    if (counter % 50 == 0) begin
-        // $display("---Time: %dns---", counter * 2);
-    end
-  end
+//   always @(posedge clk_in) begin
+//     counter <= counter + 1;
+//     if (counter % 50 == 0) begin
+//         // $display("---Time: %dns---", counter * 2);
+//     end
+//   end
 
 endmodule
 

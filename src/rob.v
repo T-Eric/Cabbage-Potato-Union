@@ -49,6 +49,7 @@ module reorder_buffer (
     output rf_rdyk_o,
     output [`DAT_W - 1:0] rf_rdyvj_o,
     output [`DAT_W - 1:0] rf_rdyvk_o,
+    output [`DAT_W - 1:0] lsb_rdypc_o,
 
     // Branch / JUMP
     output reg                br_flag,  // if mispredict
@@ -91,6 +92,7 @@ module reorder_buffer (
   assign rf_rdyk_o = ready[rf_reqqk_i];
   assign rf_rdyvj_o = v[rf_reqqj_i];
   assign rf_rdyvk_o = v[rf_reqqk_i];
+  assign lsb_rdypc_o = pc[chead];
 
   // ---debug---
   // wire [`OP_W-1:0] DHop;
